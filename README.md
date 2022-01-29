@@ -20,5 +20,5 @@
 2. **多目标优化-Uncertainty Weight、GradNorm、Dynamic Weight Average、Pareto-Eficient**：https://zhuanlan.zhihu.com/p/456089764
 
 # 推荐系统
-## 召回
+## Match(召回)
 1. **多兴趣召回MIND**: https://zhuanlan.zhihu.com/p/463064543
