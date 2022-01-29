@@ -4,19 +4,28 @@ from typing import List
 
 class MIND:
 
-    def __init__(self, k_max, p, dnn_hidden_size, dnn_activation, dropout, use_bn, l2_reg,
-                 num_sampled,
-                 dim, user_vocab_size, item_vocab_size, all_item_idx):
+    def __init__(self, k_max: int,
+                 p: float,
+                 dnn_hidden_size: List[int],
+                 dnn_activation,
+                 dropout: float,
+                 use_bn: bool,
+                 l2_reg: float,
+                 num_sampled: int,
+                 dim: int,
+                 user_vocab_size: List[int],
+                 item_vocab_size: List[int],
+                 all_item_idx: List[List[int]]):
         """
 
         :param k_max: 兴趣向量的个数K
         :param p: 调整attention分布的参数
-        :param dnn_hidden_size:
-        :param dnn_activation:
+        :param dnn_hidden_size: 如 [256, 128]
+        :param dnn_activation: 如 tf.nn.relu
         :param dropout:
         :param use_bn: 是否使用batch_normalization
         :param l2_reg: l2正则化惩罚项
-        :param num_sampled: 随机负采样的batch_size
+        :param num_sampled: 随机负采样的个数，问题即转化为对应 num_sampled 分类
         :param dim: 用户向量和item向量的维度dim
         :param user_vocab_size: 所有用户属性的特征个数列表，例如有1w用户id、3种性别、10个年龄段，则输入[10000, 3, 10]
         :param item_vocab_size: 所有用户属性的特征个数列表，理解同上
