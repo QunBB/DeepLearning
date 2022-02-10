@@ -13,6 +13,7 @@ class MIND:
                  l2_reg: float,
                  num_sampled: int,
                  dim: int,
+                 interest_capsules_dim: int,
                  user_vocab_size: List[int],
                  item_vocab_size: List[int],
                  all_item_idx: List[List[int]]):
@@ -27,6 +28,7 @@ class MIND:
         :param l2_reg: l2正则化惩罚项
         :param num_sampled: 随机负采样的个数，问题即转化为对应 num_sampled 分类
         :param dim: 用户向量和item向量的维度dim
+        :param interest_capsules_dim: 兴趣capsule(high capsule)的维度
         :param user_vocab_size: 所有用户属性的特征个数列表，例如有1w用户id、3种性别、10个年龄段，则输入[10000, 3, 10]
         :param item_vocab_size: 所有用户属性的特征个数列表，理解同上
         :param all_item_idx: 所有item的特征输入
@@ -39,6 +41,7 @@ class MIND:
         self.use_bn = use_bn
         self.l2_reg = l2_reg
         self.num_sampled = num_sampled
+        self.interest_capsules_dim = interest_capsules_dim
 
         self.user_tables = [tf.get_variable("user_table_" + str(i), shape=[size, dim]
                                             ) for i, size in enumerate(user_vocab_size)]
@@ -146,11 +149,12 @@ class MIND:
 
     def capsule_network(self, low_capsule, k_max, seq_len):
         max_seq_len = low_capsule.shape.as_list()[-2]
+        # item向量的维度dim
         dim = low_capsule.shape.as_list()[-1]
 
         bilinear_mapping_matrix = tf.get_variable(name='bilinear_mapping_matrix',
                                                   # shape=[dim, dim],
-                                                  initializer=tf.truncated_normal(shape=[dim, dim]))
+                                                  initializer=tf.truncated_normal(shape=[dim, self.interest_capsules_dim]))
 
         # 高斯分布初设化
         routing_logits = tf.get_variable(name='routing_logits',
@@ -211,6 +215,7 @@ if __name__ == '__main__':
                  l2_reg=0.00001,
                  num_sampled=20,
                  dim=128,
+                 interest_capsules_dim=128,
                  user_vocab_size=[10000, 3, 10],
                  item_vocab_size=[10000, 100],  # 1w个item_id，100个cat_id
                  all_item_idx=[[i for i in range(10000)], [random.randint(0, 100) for _ in range(10000)]]  # 这里就对应输入1w个item的item_id和cat_id
