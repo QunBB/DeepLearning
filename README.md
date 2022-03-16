@@ -27,8 +27,6 @@
 1. **多兴趣召回MIND**: https://zhuanlan.zhihu.com/p/463064543
 
 # TensorRT & Triton
-
-# TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
 
 Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
