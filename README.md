@@ -21,4 +21,20 @@
 
 # 推荐系统
 ## Match(召回)
+
+项目文件夹：Match
+
 1. **多兴趣召回MIND**: https://zhuanlan.zhihu.com/p/463064543
+
+# TensorRT & Triton
+
+# TensorRT & Triton
+TensorRT：一种深度学习框架，提升GPU模型推理性能
+
+Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
+
+## Triton
+
+项目文件夹：Triton
+
+1. **TensorRT&Triton学习笔记(一)**: triton和模型部署+client：https://zhuanlan.zhihu.com/p/482170985
