@@ -36,3 +36,9 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 项目文件夹：Triton
 
 1. **TensorRT&Triton学习笔记(一)**: triton和模型部署+client：https://zhuanlan.zhihu.com/p/482170985
+
+# 自然语言处理NLP
+
+## bert句向量
+
+**Sentence-BERT**: https://zhuanlan.zhihu.com/p/504983847
