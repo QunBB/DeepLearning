@@ -50,3 +50,4 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 带pt后缀的为pytorch实现版本，不带后缀的则为tensorflow版本。
 
 - **变量初始化(initialization)、分层学习率(hierarchical_lr)、梯度累积(gradient_accumulation)**: https://zhuanlan.zhihu.com/p/553277132
+- **Stochastic Weight Averaging (SWA)、Exponential Moving Average(EMA)**：https://zhuanlan.zhihu.com/p/554955968
