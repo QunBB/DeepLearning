@@ -20,9 +20,14 @@
 - **多目标优化-Uncertainty Weight、GradNorm、Dynamic Weight Average、Pareto-Eficient**：https://zhuanlan.zhihu.com/p/456089764
 
 # 3. 推荐系统
+
+项目文件夹：Recommendation
+
+- **ctr训练提速(超大batch size)-CowClip**：https://zhuanlan.zhihu.com/p/557451365
+
 ## 3.1 Match(召回)
 
-项目文件夹：Match
+项目文件夹：Recommendation/Match
 
 - **多兴趣召回MIND**: https://zhuanlan.zhihu.com/p/463064543
 
@@ -51,3 +56,4 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 - **变量初始化(initialization)、分层学习率(hierarchical_lr)、梯度累积(gradient_accumulation)**: https://zhuanlan.zhihu.com/p/553277132
 - **Stochastic Weight Averaging (SWA)、Exponential Moving Average(EMA)**：https://zhuanlan.zhihu.com/p/554955968
+
