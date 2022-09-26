@@ -29,8 +29,8 @@ class MIND:
         :param num_sampled: 随机负采样的个数，问题即转化为对应 num_sampled 分类
         :param dim: 用户向量和item向量的维度dim
         :param interest_capsules_dim: 兴趣capsule(high capsule)的维度
-        :param user_vocab_size: 所有用户属性的特征个数列表，例如有1w用户id、3种性别、10个年龄段，则输入[10000, 3, 10]
-        :param item_vocab_size: 所有用户属性的特征个数列表，理解同上
+        :param user_vocab_size: 所有用户属性的特征个数列表<u1, u2....>，例如有1w用户id、3种性别、10个年龄段，则输入[10000, 3, 10]
+        :param item_vocab_size: 所有item属性的特征个数列表<i1, i2....>，理解同上
         :param all_item_idx: 所有item的特征输入
         """
         self.k_max = k_max
@@ -70,8 +70,8 @@ class MIND:
                  training: bool):
         """
 
-        :param user_feat_inputs: 用户特征输入列表，特征顺序要与上述的user_vocab_size一致，[ tensor[batch_size], .....]
-        :param behavior_item_inputs: 用户的历史行为item输入列表, [ tensor[batch_size, max_seq_len], .....]
+        :param user_feat_inputs: 用户特征输入列表，特征顺序要与上述的user_vocab_size一致，[ tensor<u1>[batch_size], tensor<u2>[batch_size], .....]
+        :param behavior_item_inputs: 用户的历史行为item输入列表, [ tensor<i1>[batch_size, max_seq_len], tensor<i2>[batch_size, max_seq_len], .....]
         :param target_item_inputs: 目标item输入列表, [ tensor[batch_size], .....]
         :param seq_len: 用户的历史行为item长度, tensor[batch_size]
         :param training:
@@ -160,16 +160,18 @@ class MIND:
         routing_logits = tf.get_variable(name='routing_logits',
                                          initializer=tf.truncated_normal(shape=[1, k_max, max_seq_len]),
                                          trainable=False)
+
+        low_capsule_mapping = tf.tensordot(low_capsule, bilinear_mapping_matrix, axes=1)
+
         # 用户行为不足N个的需要mask
         seq_len_tile = tf.tile(tf.expand_dims(seq_len, axis=-1), [1, k_max])
         mask = tf.sequence_mask(seq_len_tile, max_seq_len)
         pad = tf.ones_like(mask, dtype=tf.float32) * (-2 ** 32 + 1)
-        routing_logits_with_padding = tf.where(mask, routing_logits, pad)
 
         for _ in range(3):
+            routing_logits_with_padding = tf.where(mask, routing_logits, pad)
             w = tf.nn.softmax(routing_logits_with_padding)
 
-            low_capsule_mapping = tf.tensordot(low_capsule, bilinear_mapping_matrix, axes=1)
             candidate_vector = tf.matmul(w, low_capsule_mapping)
 
             high_capsule = self.squash(candidate_vector)
