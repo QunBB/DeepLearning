@@ -5,7 +5,7 @@
 
 该仓库提供了tensorflow和torch两种框架的BERT预训练代码实现。
 
-# 特征
+# 特性
 - 针对中文句子，支持以词为粒度，而非字的全词掩码（Whole Word Masking），以及n-gram掩码（MASK）。
 - 支持停用词不参与MASK
 - 支持单机多卡的预训练
