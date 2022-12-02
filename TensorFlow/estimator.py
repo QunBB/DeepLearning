@@ -84,4 +84,4 @@ if __name__ == '__main':
 
     # 其实给到estimator.train是一个dataset对象
     input_fn = input_fn_bulider('test.tfrecord', batch_size=1, is_training=True)
-    estimator.train(input_fn, max_steps=1000)
+    estimator.train(input_fn, max_steps=1000, hooks=[logging_hook])
