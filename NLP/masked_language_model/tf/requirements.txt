@@ -1,0 +1,2 @@
+jieba
+tensorflow-gpu==1.15.5

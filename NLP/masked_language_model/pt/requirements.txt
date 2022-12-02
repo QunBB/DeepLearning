@@ -1,0 +1,5 @@
+crc32c
+jieba
+transformers
+torch==1.9
+huggingface-hub==0.4.0
