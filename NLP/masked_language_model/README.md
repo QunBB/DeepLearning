@@ -7,7 +7,7 @@
 - [要点](#要点)
 	- [中文全词MASK](#中文全词mask)
 	- [tensorflow-estimator](#tensorflow-estimator)
-	- [torch](#torch)
+	- [torch-tfrecord](#torch-tfrecord)
 
 
 # 简介
@@ -227,7 +227,7 @@ python run_pretraining.py \
 
 使用[MirroredStrategy](https://www.tensorflow.org/guide/distributed_training#mirroredstrategy)来实现多GPU训练
 
-## torch
+## torch-tfrecord
 
 使用了[tfrecord](https://github.com/vahidk/tfrecord)作为存储介质，解决了内存资源问题，并且优化了`num_workers > 0`场景下的问题，包括：
 
