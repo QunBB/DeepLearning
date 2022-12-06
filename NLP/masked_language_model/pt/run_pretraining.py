@@ -192,7 +192,8 @@ def merge_best_model(args, best_model_path):
         else:
             dest = model_path+'-pretrained'
             os.rename(model_path, dest)
-        shutil.copy(best_model_path, os.path.join(dest, 'pytorch_model.bin'))
+        # shutil.copy(best_model_path, os.path.join(dest, 'pytorch_model.bin'))
+        torch.save(torch.load(best_model_path)['model_state_dict'], os.path.join(dest, 'pytorch_model.bin'))
         print(f'pretrained model export to {dest}')
 
 

@@ -1,5 +1,6 @@
 - [简介](#简介)
 - [特性](#特性)
+- [Requirements](#requirements)
 - [关键参数](#关键参数)
 - [快速开始](#快速开始)
 	- [tensorflow版本](#tensorflow版本)
@@ -16,12 +17,35 @@
 一般情况下，使用BERT进行微调都可以取得不错的效果，但在某些垂直领域，可能由于现有的BERT模型的预训练语料涉及较少，需要使用该领域的文本语料继续进行预训练，才能达到满意的效果。
 
 该仓库提供了tensorflow和torch两种框架的BERT预训练代码实现。
+（也可前往单独的[github](https://github.com/QunBB/bert-pretraining)）
 
 # 特性
 - 针对中文句子，支持以词为粒度，而非字的全词掩码（Whole Word Masking），以及n-gram掩码（MASK）。
 - 支持停用词不参与MASK
 - 支持单机多卡的预训练
 - 使用tfrecord作为存储介质，支持低内存资源下的超大语料使用
+
+# Requirements
+- **Python 3.x**
+
+- **tensorflow**
+```
+jieba
+tensorflow-gpu==1.15.5
+# tensorflow==1.15.5
+```
+或者
+
+- **torch**
+
+```
+crc32c
+jieba
+transformers
+torch==1.9
+huggingface-hub==0.4.0
+
+```
 
 # 关键参数
 |   参数名称   |  说明    |  类型  |  默认值  |
@@ -69,7 +93,7 @@
 - **拷贝仓库代码**
 
 ```sh
-git clone
+git clone https://github.com/QunBB/DeepLearning.git
 
 cd DeepLearning/NLP/masked_language_model/tf
 
@@ -150,7 +174,7 @@ python run_pretraining_sess.py \
 - **拷贝仓库代码**
 
 ```sh
-git clone
+git clone https://github.com/QunBB/DeepLearning.git
 
 cd DeepLearning/NLP/masked_language_model/pt
 
@@ -197,12 +221,12 @@ python run_pretraining.py \
 
 ```
 <cache_dir>/<model_name>-pretrained
-	pytorch_model.bin
-	config.json
-	tokenizer.json
-	tokenizer_config.json
-	vocab.txt
-	README.md
+  pytorch_model.bin
+  config.json
+  tokenizer.json
+  tokenizer_config.json
+  vocab.txt
+  README.md
 ```
 
 - **微调**

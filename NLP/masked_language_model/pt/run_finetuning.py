@@ -29,6 +29,11 @@ class YourModel(torch.nn.Module):
 
 
 if __name__ == '__main__':
-    main('../cache/bert-base-chinese-pretrained')
+    # just use the pretrained model like BertModel from transformer
+    # saved by run_pretraining.py[line 186]
+    model = BertModel.from_pretrained('../cache/bert-base-chinese-pretrained')
+
+    # saved by run_pretraining.py[line 111]
+    # main('../cache/bert-base-chinese-pretrained')
     # or
-    model = YourModel('../cache/bert-base-chinese-pretrained')
+    # model = YourModel('../cache/bert-base-chinese-pretrained')
