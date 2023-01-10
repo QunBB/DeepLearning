@@ -45,9 +45,17 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 # 5. 自然语言处理NLP
 
+项目文件夹：NLP
+
 ## 5.1 bert句向量
 
-**Sentence-BERT**: https://zhuanlan.zhihu.com/p/504983847
+- **Sentence-BERT**: https://zhuanlan.zhihu.com/p/504983847
+
+## 5.2 bert系列
+
+**BERT预训练代码(tensorflow和torch版本)：对应文件夹 -> NLP/masked_language_model**
+
+- **BERT模型系列大全解读**：https://zhuanlan.zhihu.com/p/598095233
 
 # 6. 深度学习trick
 
