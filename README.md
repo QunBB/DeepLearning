@@ -53,7 +53,7 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 ## 5.2 bert系列
 
-**BERT预训练代码(tensorflow和torch版本)：对应文件夹 -> NLP/masked_language_model**
+**BERT预训练代码(tensorflow和torch版本)：[NLP/masked_language_model](https://github.com/QunBB/DeepLearning/tree/main/NLP/masked_language_model)**
 
 - **BERT模型系列大全解读**：https://zhuanlan.zhihu.com/p/598095233
 
