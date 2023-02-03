@@ -1,6 +1,8 @@
 import tensorflow as tf
 from typing import List
 
+from Recommendation.Utils.core import dnn_layer
+
 
 class MIND:
 
@@ -12,11 +14,13 @@ class MIND:
                  use_bn: bool,
                  l2_reg: float,
                  num_sampled: int,
-                 dim: int,
                  interest_capsules_dim: int,
                  user_vocab_size: List[int],
                  item_vocab_size: List[int],
-                 all_item_idx: List[List[int]]):
+                 user_emb_dim: List[int],
+                 item_emb_dim: List[int],
+                 all_item_idx: List[List[int]],
+                 mode: str = 'mean'):
         """
 
         :param k_max: 兴趣向量的个数K
@@ -27,11 +31,13 @@ class MIND:
         :param use_bn: 是否使用batch_normalization
         :param l2_reg: l2正则化惩罚项
         :param num_sampled: 随机负采样的个数，问题即转化为对应 num_sampled 分类
-        :param dim: 用户向量和item向量的维度dim
         :param interest_capsules_dim: 兴趣capsule(high capsule)的维度
         :param user_vocab_size: 所有用户属性的特征个数列表<u1, u2....>，例如有1w用户id、3种性别、10个年龄段，则输入[10000, 3, 10]
         :param item_vocab_size: 所有item属性的特征个数列表<i1, i2....>，理解同上
+        :param user_emb_dim: 用户不同特征的embedding维度列表，顺序与user_vocab_size需保持一致
+        :param item_emb_dim: item不同特征的embedding维度列表，顺序与item_vocab_size需保持一致
         :param all_item_idx: 所有item的特征输入
+        :param mode: 'mean' or 'concat'，代表item特征组合方式
         """
         self.k_max = k_max
         self.p = p
@@ -42,17 +48,29 @@ class MIND:
         self.l2_reg = l2_reg
         self.num_sampled = num_sampled
         self.interest_capsules_dim = interest_capsules_dim
+        self.mode = mode
 
-        self.user_tables = [tf.get_variable("user_table_" + str(i), shape=[size, dim]
+        self.user_tables = [tf.get_variable("user_table_" + str(i), shape=[size, user_emb_dim[i]]
                                             ) for i, size in enumerate(user_vocab_size)]
-        self.item_tables = [tf.get_variable("item_table_" + str(i), shape=[size, dim]
+        self.item_tables = [tf.get_variable("item_table_" + str(i), shape=[size, item_emb_dim[i]]
                                             ) for i, size in enumerate(item_vocab_size)]
 
         self.item_vocab_size = len(all_item_idx[0])
 
         with tf.variable_scope("embedding_layer"):
-            self.all_item_embedding = sum([tf.nn.embedding_lookup(item_table, item_ids) for item_table, item_ids in
-                                           zip(self.item_tables, all_item_idx)]) / len(all_item_idx)
+            # 用户向量的维度必须与item的向量维度相同
+            if self.mode == 'mean':
+                assert all([item_emb_dim[i] == item_emb_dim[i+1] for i in range(len(item_emb_dim)-1)])
+                assert dnn_hidden_size[-1] == item_emb_dim[0]
+                self.all_item_embedding = sum([tf.nn.embedding_lookup(item_table, item_ids) for item_table, item_ids in
+                                               zip(self.item_tables, all_item_idx)]) / len(all_item_idx)
+            elif self.mode == 'concat':
+                assert dnn_hidden_size[-1] == sum(item_emb_dim)
+                self.all_item_embedding = tf.concat([tf.nn.embedding_lookup(item_table, item_ids) for
+                                                    item_table, item_ids in zip(self.item_tables, all_item_idx)],
+                                                    axis=-1)
+            else:
+                raise NotImplementedError(f"`mode` only supports 'mean' or 'concat', but got '{mode}'")
 
         self.zero_bias = tf.get_variable("zero_bias", shape=[self.item_vocab_size], trainable=False)
 
@@ -71,7 +89,7 @@ class MIND:
         """
 
         :param user_feat_inputs: 用户特征输入列表，特征顺序要与上述的user_vocab_size一致，[ tensor<u1>[batch_size], tensor<u2>[batch_size], .....]
-        :param behavior_item_inputs: 用户的历史行为item输入列表, [ tensor<i1>[batch_size, max_seq_len], tensor<i2>[batch_size, max_seq_len], .....]
+        :param behavior_item_inputs: 用户的历史行为item及其特征输入列表, [ tensor<i1>[batch_size, max_seq_len], tensor<i2>[batch_size, max_seq_len], .....]
         :param target_item_inputs: 目标item输入列表, [ tensor[batch_size], .....]
         :param seq_len: 用户的历史行为item长度, tensor[batch_size]
         :param training:
@@ -80,7 +98,10 @@ class MIND:
         with tf.variable_scope("embedding_layer"):
             behavior_item_embedding = [tf.nn.embedding_lookup(table, inputs) for table, inputs in zip(self.item_tables, behavior_item_inputs)]
             # [batch_size, max_seq_len, dim]
-            behavior_item_embedding = sum(behavior_item_embedding) / len(behavior_item_embedding)
+            if self.mode == 'mean':
+                behavior_item_embedding = sum(behavior_item_embedding) / len(behavior_item_embedding)
+            else:  # concat
+                behavior_item_embedding = tf.concat(behavior_item_embedding, axis=-1)
 
             user_embedding = [tf.nn.embedding_lookup(table, inputs) for table, inputs in zip(self.user_tables, user_feat_inputs)]
             # [batch_size, dim*n]
@@ -96,17 +117,22 @@ class MIND:
 
             dnn_inputs = tf.concat([interest_capsules, user_embedding], axis=-1)
 
-            user_vectors = self.dnn_layer(dnn_inputs, hidden_size=self.dnn_hidden_size,
-                                          activation=self.dnn_activation,
-                                          dropout=self.dropout,
-                                          use_bn=self.use_bn,
-                                          l2_reg=self.l2_reg)
+            user_vectors = dnn_layer(dnn_inputs,
+                                     is_training=training,
+                                     hidden_size=self.dnn_hidden_size,
+                                     activation=self.dnn_activation,
+                                     dropout=self.dropout,
+                                     use_bn=self.use_bn,
+                                     l2_reg=self.l2_reg)
         if not training:
             return user_vectors
 
         with tf.variable_scope("embedding_layer"):
             target_item_embedding = [tf.nn.embedding_lookup(table, inputs) for table, inputs in zip(self.item_tables, target_item_inputs)]
-            target_item_embedding = sum(target_item_embedding) / len(target_item_embedding)
+            if self.mode == 'mean':
+                target_item_embedding = sum(target_item_embedding) / len(target_item_embedding)
+            else:
+                target_item_embedding = tf.concat(target_item_embedding, axis=-1)
 
         with tf.variable_scope("label_aware_attention_layer"):
             user_vectors, loss = self.label_aware_attention_layer(user_vectors, target_item_embedding, seq_len)
@@ -189,21 +215,6 @@ class MIND:
 
         return z / z_l1 * z_l2 / (1 + z_l2)
 
-    def dnn_layer(self, inputs, hidden_size, activation, dropout, use_bn, l2_reg):
-        output = inputs
-        for size in hidden_size:
-            output = tf.layers.dense(output, size,
-                                     kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
-                                     kernel_initializer=tf.glorot_normal_initializer())
-            if use_bn:
-                output = tf.layers.batch_normalization(output)
-
-            output = activation(output)
-
-            output = tf.nn.dropout(output, 1 - dropout)
-
-        return output
-
 
 if __name__ == '__main__':
     import random
@@ -216,12 +227,30 @@ if __name__ == '__main__':
                  use_bn=True,
                  l2_reg=0.00001,
                  num_sampled=20,
-                 dim=128,
                  interest_capsules_dim=128,
-                 user_vocab_size=[10000, 3, 10],
+                 user_vocab_size=[10000, 3, 10],  # 1w用户id、3种性别、10个年龄段
                  item_vocab_size=[10000, 100],  # 1w个item_id，100个cat_id
-                 all_item_idx=[[i for i in range(10000)], [random.randint(0, 100) for _ in range(10000)]]  # 这里就对应输入1w个item的item_id和cat_id
+                 user_emb_dim=[256, 64, 128],  # 用户id、性别、年龄段映射的embedding维度分别为256、64、128
+                 item_emb_dim=[64, 64],  # item_id、cat_id映射的embedding维度分别为64、64
+                 all_item_idx=[[i for i in range(10000)], [random.randint(0, 100) for _ in range(10000)]],  # 这里就对应输入1w个item的item_id和cat_id,
+                 mode='concat'
                  )
+    # model = MIND(k_max=3,
+    #              p=10,
+    #              dnn_hidden_size=[256, 128],
+    #              dnn_activation=tf.nn.relu,
+    #              dropout=0.1,
+    #              use_bn=True,
+    #              l2_reg=0.00001,
+    #              num_sampled=20,
+    #              interest_capsules_dim=128,
+    #              user_vocab_size=[10000, 3, 10],
+    #              item_vocab_size=[10000, 100],  # 1w个item_id，100个cat_id
+    #              user_emb_dim=[256, 64, 128],
+    #              item_emb_dim=[128, 128],
+    #              all_item_idx=[[i for i in range(10000)], [random.randint(0, 100) for _ in range(10000)]],  # 这里就对应输入1w个item的item_id和cat_id,
+    #              mode='mean'
+    #              )
     # batch输入
     user_feat_inputs = [tf.placeholder(dtype=tf.int32, shape=[None]) for _ in range(3)]
     behavior_item_inputs = [tf.placeholder(dtype=tf.int32, shape=[None, 20]) for _ in range(2)]

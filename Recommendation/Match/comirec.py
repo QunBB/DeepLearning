@@ -1,5 +1,18 @@
 """https://github.com/THUDM/ComiRec"""
 import tensorflow as tf
+from enum import IntEnum
+
+
+class ModelType(IntEnum):
+    MIND = 0
+    ComiRecSA = 1
+    ComiRecDR = 2
+
+    def __repr__(self):
+        return "<{}: {}>".format(self.__class__.__name__, self._name_)
+
+    def __str__(self):
+        return self._name_
 
 
 class Model(object):
@@ -61,12 +74,12 @@ def get_shape(inputs):
 
 
 class CapsuleNetwork(tf.layers.Layer):
-    def __init__(self, dim, seq_len, bilinear_type='ComiRecDR', num_interest=4, hard_readout=True, relu_layer=False):
+    def __init__(self, dim, seq_len, bilinear_type, num_interest=4, hard_readout=True, relu_layer=False):
         """
         胶囊网络初始化
         :param dim: 兴趣capsule的维度
         :param seq_len: 用户的历史行为序列的长度
-        :param bilinear_type: "ComiRecDR"或者"MIND"
+        :param bilinear_type: ComiRecDR或者MIND
         :param num_interest: 兴趣capsule的个数
         :param hard_readout: True表示直接挑选注意力权重最大的一个兴趣capsule，False表示用注意力权重对多个兴趣capsule进行加权求和
         :param relu_layer: 兴趣capsule是否再经过一层带relu的全连接层
@@ -89,7 +102,7 @@ class CapsuleNetwork(tf.layers.Layer):
         :return:
         """
         with tf.variable_scope('bilinear'):
-            if self.bilinear_type == 'MIND':  # 用于MIND
+            if self.bilinear_type == ModelType.MIND:  # 用于MIND
                 item_emb_hat = tf.layers.dense(item_his_emb, self.dim, activation=None, bias_initializer=None)
                 item_emb_hat = tf.tile(item_emb_hat, [1, 1, self.num_interest])
             else:  # 用于ComiRecDR
@@ -112,7 +125,7 @@ class CapsuleNetwork(tf.layers.Layer):
             item_emb_hat_iter = item_emb_hat
 
         # 公式的b_ji对应capsule_weight
-        if self.bilinear_type > 0:
+        if self.bilinear_type != ModelType.MIND:
             capsule_weight = tf.stop_gradient(tf.zeros([get_shape(item_his_emb)[0], self.num_interest, self.seq_len]))
         else:
             capsule_weight = tf.stop_gradient(
@@ -172,7 +185,7 @@ class MIND(Model):
 
         item_his_emb = self.item_his_eb
 
-        capsule_network = CapsuleNetwork(hidden_size, seq_len, bilinear_type='MIND', num_interest=num_interest,
+        capsule_network = CapsuleNetwork(hidden_size, seq_len, bilinear_type=ModelType.MIND, num_interest=num_interest,
                                          hard_readout=hard_readout, relu_layer=relu_layer)
         self.user_eb, self.readout = capsule_network(item_his_emb, self.item_eb, self.mask)
 
@@ -186,7 +199,8 @@ class ComiRecDR(Model):
 
         item_his_emb = self.item_his_eb
 
-        capsule_network = CapsuleNetwork(hidden_size, seq_len, bilinear_type='ComiRecDR', num_interest=num_interest,
+        capsule_network = CapsuleNetwork(hidden_size, seq_len,
+                                         bilinear_type=ModelType.ComiRecDR, num_interest=num_interest,
                                          hard_readout=hard_readout, relu_layer=relu_layer)
         self.user_eb, self.readout = capsule_network(item_his_emb, self.item_eb, self.mask)
 
