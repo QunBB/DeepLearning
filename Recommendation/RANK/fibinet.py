@@ -48,12 +48,12 @@ class FiBiNet:
     def __call__(self, sparse_embeddings_list: List[tf.Variable],
                  dense_embeddings_list: List[tf.Variable],
                  is_training: bool = True):
-        sparse_embeddings_list = [tf.layers.batch_normalization(inputs=emb, name=f'sparse_bn_{i}', training=is_training)
+        sparse_embeddings_list = [tf.contrib.layers.layer_norm(inputs=emb,
+                                                               begin_norm_axis=-1,
+                                                               begin_params_axis=-1,
+                                                               scope=f'sparse_ln_{i}')
                                   for i, emb in enumerate(sparse_embeddings_list)]
-        dense_embeddings_list = [tf.contrib.layers.layer_norm(inputs=emb,
-                                                              begin_norm_axis=-1,
-                                                              begin_params_axis=-1,
-                                                              scope=f'dense_ln_{i}')
+        dense_embeddings_list = [tf.layers.batch_normalization(inputs=emb, name=f'dense_bn_{i}', training=is_training)
                                  for i, emb in enumerate(dense_embeddings_list)]
         senet_output = self.senet(sparse_embeddings_list + dense_embeddings_list)
         bilinear_output = self.bilinear(sparse_embeddings_list + dense_embeddings_list)
