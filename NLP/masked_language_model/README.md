@@ -22,7 +22,7 @@
 PS：这篇文章[(链接)](https://zhuanlan.zhihu.com/p/598095233)讲述了BERT模型以其变种系列。
 
 # 特性
-- 针对中文句子，支持以词为粒度，而非字的全词掩码（Whole Word Masking），以及n-gram掩码（MASK）。
+- 针对中文句子，支持以词为粒度，而非字的全词掩码（Whole Word Masking），以及n-gram掩码（MASK），即中文RoBERTa的预训练方式（配合动态MASK）。。
 - 支持停用词不参与MASK
 - 支持单机多卡的预训练
 - 使用tfrecord作为存储介质，支持低内存资源下的超大语料使用
