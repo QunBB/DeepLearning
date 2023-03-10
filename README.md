@@ -37,6 +37,7 @@
 项目文件夹：[Recommendation/RANK](https://github.com/QunBB/DeepLearning/tree/main/Recommendation/RANK)
 
 - **ctr特征重要性建模：FiBiNet&FiBiNet++模型**：https://zhuanlan.zhihu.com/p/603262632
+- **ctr预估之FMs系列:FM/FFM/FwFM/FEFM**：https://zhuanlan.zhihu.com/p/613030015
 
 # 4. TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
