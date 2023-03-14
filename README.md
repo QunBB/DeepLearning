@@ -32,6 +32,11 @@
 - **多兴趣召回MIND**: https://zhuanlan.zhihu.com/p/463064543
 - **多兴趣召回ComiRec**: https://zhuanlan.zhihu.com/p/568781562
 
+
+
+- **深入浅出地理解Youtube DNN推荐模型**: https://zhuanlan.zhihu.com/p/405907646
+- **引入对偶增强向量的双塔召回模型**: https://zhuanlan.zhihu.com/p/608636233
+
 ## 3.2 RANK(排序)
 
 项目文件夹：[Recommendation/RANK](https://github.com/QunBB/DeepLearning/tree/main/Recommendation/RANK)
