@@ -41,7 +41,8 @@ class FMs:
                  fields_list: List[Field],
                  embedding_dim: int,
                  linear_type: LinearTerms,
-                 model_type: FMType):
+                 model_type: FMType,
+                 l2_reg: float = 0.):
         self.embeddings_table = {}
         self.weights_table = {}
         self.num_fields = len(fields_list)
@@ -49,23 +50,30 @@ class FMs:
         for field in fields_list:
             # embeddings 隐向量
             self.embeddings_table[field.name] = tf.get_variable('emb_' + field.name,
-                                                                shape=[field.vocabulary_size, embedding_dim])
+                                                                shape=[field.vocabulary_size, embedding_dim],
+                                                                regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
 
             # 线性项权重
             if linear_type == LinearTerms.LW:
-                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[field.vocabulary_size])
+                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[field.vocabulary_size],
+                                                                 regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
             elif linear_type == LinearTerms.FeLV:
-                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[field.vocabulary_size, embedding_dim])
+                self.weights_table[field.name] = tf.get_variable('w_' + field.name,
+                                                                 shape=[field.vocabulary_size, embedding_dim],
+                                                                 regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
             else:
-                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[1, embedding_dim])
+                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[1, embedding_dim],
+                                                                 regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
 
         if model_type == FMType.FwFM:
             self.interaction_strengths = tf.get_variable('interaction_strengths',
-                                                         shape=[self.num_fields, self.num_fields])
+                                                         shape=[self.num_fields, self.num_fields],
+                                                         regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
             self.interaction_func = self._fwfm_interaction
         elif model_type == FMType.FEFM:
             self.interaction_strengths = tf.get_variable('interaction_strengths',
-                                                         shape=[self.num_fields, self.num_fields, embedding_dim, embedding_dim])
+                                                         shape=[self.num_fields, self.num_fields, embedding_dim, embedding_dim],
+                                                         regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
             self.interaction_func = self._fefm_interaction
         else:
             self.interaction_func = self._fm_interaction
