@@ -65,7 +65,10 @@ class FiBiNet:
                            dropout=self.dropout,
                            use_bn=self.dnn_use_bn,
                            l2_reg=self.dnn_l2_reg)
-        return output
+        output = tf.layers.dense(output, 1, activation=tf.nn.sigmoid,
+                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(self.dnn_l2_reg),
+                                 kernel_initializer=tf.glorot_normal_initializer())
+        return tf.reshape(output, [-1])
 
 
 if __name__ == '__main__':

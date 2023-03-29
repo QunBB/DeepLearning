@@ -40,8 +40,8 @@ class FMs:
     def __init__(self,
                  fields_list: List[Field],
                  embedding_dim: int,
-                 linear_type: LinearTerms,
-                 model_type: FMType,
+                 linear_type: LinearTerms = LinearTerms.LW,
+                 model_type: FMType = FMType.FM,
                  l2_reg: float = 0.):
         self.embeddings_table = {}
         self.weights_table = {}
@@ -103,6 +103,8 @@ class FMs:
         fms_logit = self.interaction_func(interactions)
 
         final_logit = tf.add_n(linear_logit + [fms_logit])
+
+        final_logit = tf.nn.sigmoid(final_logit)
 
         return final_logit
 
