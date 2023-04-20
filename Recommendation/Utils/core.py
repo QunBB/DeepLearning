@@ -15,7 +15,7 @@ def dnn_layer(inputs,
                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
                                  kernel_initializer=tf.glorot_normal_initializer())
         if use_bn:
-            output = tf.layers.batch_normalization(output)
+            output = tf.layers.batch_normalization(output, training=is_training)
 
         output = activation(output)
 

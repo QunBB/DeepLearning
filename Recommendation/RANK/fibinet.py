@@ -1,9 +1,9 @@
 import tensorflow as tf
 from typing import List, Callable
 
-from Recommendation.Utils.core import dnn_layer
-from Recommendation.Utils.senet import SENet
-from Recommendation.Utils.bilinear import BiLinear
+from ..Utils.core import dnn_layer
+from ..Utils.senet import SENet
+from ..Utils.bilinear import BiLinear
 
 
 class FiBiNet:
@@ -69,19 +69,3 @@ class FiBiNet:
                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(self.dnn_l2_reg),
                                  kernel_initializer=tf.glorot_normal_initializer())
         return tf.reshape(output, [-1])
-
-
-if __name__ == '__main__':
-    # test
-    model = FiBiNet(dnn_units=[512, 128],
-                    dropout=0.2,
-                    reduction_ratio=2,
-                    num_groups=2,
-                    bilinear_output_size=64,
-                    bilinear_type='interaction',
-                    bilinear_plus=False,
-                    equal_dim=False,)
-    output = model([tf.placeholder(tf.float32, [None, 128]) for _ in range(20)],
-                   [tf.placeholder(tf.float32, [None, 64]) for _ in range(10)],
-                   is_training=True)
-    print(output)

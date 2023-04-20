@@ -159,31 +159,3 @@ class FMs:
             logits.append(tf.reshape(_logit, [-1]))
 
         return tf.add_n(logits)
-
-
-if __name__ == '__main__':
-    # 测试程序
-    import numpy as np
-    import os
-    from collections import OrderedDict
-    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-
-    batch_size = 32
-
-    model = FMs([Field(name='c1', vocabulary_size=100),
-                 Field(name='c2', vocabulary_size=100),
-                 Field(name='d1')],
-                embedding_dim=4,
-                linear_type=LinearTerms.FiLV,
-                model_type=FMType.FEFM)
-    sparse_inputs_dict = OrderedDict(c1=tf.convert_to_tensor(np.random.randint(0, 99, size=[batch_size])),
-                                     c2=tf.convert_to_tensor(np.random.randint(0, 99, size=[batch_size])))
-    dense_inputs_dict = OrderedDict(d1=tf.convert_to_tensor(np.random.random(size=[batch_size]).astype(np.float32)))
-
-    output = model(sparse_inputs_dict, dense_inputs_dict)
-
-    print(output)
-
-    sess = tf.Session()
-    sess.run(tf.global_variables_initializer())
-    print(sess.run(output))
