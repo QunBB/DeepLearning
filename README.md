@@ -43,6 +43,7 @@
 
 - **ctr特征重要性建模：FiBiNet&FiBiNet++模型**：https://zhuanlan.zhihu.com/p/603262632
 - **ctr预估之FMs系列:FM/FFM/FwFM/FEFM**：https://zhuanlan.zhihu.com/p/613030015
+- **ctr预估之DNN系列模型:FNN/PNN/DeepCrossing**：https://zhuanlan.zhihu.com/p/623567076
 
 # 4. TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
