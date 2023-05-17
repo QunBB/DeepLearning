@@ -22,7 +22,7 @@ class DeepCrossing:
         self.use_bn = use_bn
 
     def __call__(self,
-                 embeddings: Union[List[tf.Variable], tf.Variable],
+                 embeddings: Union[List[tf.Tensor], tf.Tensor],
                  is_training: bool = True):
         if isinstance(embeddings, list):
             embeddings = tf.concat(embeddings, axis=-1)

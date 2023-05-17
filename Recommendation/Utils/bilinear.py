@@ -33,7 +33,7 @@ class BiLinear:
         else:
             self.func = tf.multiply
 
-    def __call__(self, embeddings_inputs: List[tf.Variable]):
+    def __call__(self, embeddings_inputs: List[tf.Tensor]):
         field_size = len(embeddings_inputs)
 
         # field embeddings的size

@@ -12,7 +12,7 @@ class SENet:
         self.reduction_ratio = reduction_ratio
         self.num_groups = num_groups
 
-    def __call__(self, embeddings_list: List[tf.Variable]):
+    def __call__(self, embeddings_list: List[tf.Tensor]):
         """
 
         :param embeddings_list: [embedding_1,...,embedding_i,...,embedding_f]，f为field的数目，embedding_i is [bs, dim]

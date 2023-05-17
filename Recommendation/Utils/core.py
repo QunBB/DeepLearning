@@ -1,13 +1,13 @@
 import tensorflow as tf
-from typing import List, Callable
+from typing import List, Callable, Optional
 
 
-def dnn_layer(inputs,
+def dnn_layer(inputs: tf.Tensor,
               hidden_size: List[int],
-              activation: Callable,
-              dropout: float,
-              is_training: bool,
-              use_bn: bool,
+              activation: Optional[Callable] = None,
+              dropout: Optional[float] = 0.,
+              is_training: Optional[bool] = True,
+              use_bn: Optional[bool] = True,
               l2_reg: float = 0.):
     output = inputs
     for size in hidden_size:
@@ -17,7 +17,8 @@ def dnn_layer(inputs,
         if use_bn:
             output = tf.layers.batch_normalization(output, training=is_training)
 
-        output = activation(output)
+        if activation is not None:
+            output = activation(output)
 
         if is_training:
             output = tf.nn.dropout(output, 1 - dropout)

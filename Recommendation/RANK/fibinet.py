@@ -45,8 +45,8 @@ class FiBiNet:
         self.senet = SENet(reduction_ratio=reduction_ratio,
                            num_groups=num_groups)
 
-    def __call__(self, sparse_embeddings_list: List[tf.Variable],
-                 dense_embeddings_list: List[tf.Variable],
+    def __call__(self, sparse_embeddings_list: List[tf.Tensor],
+                 dense_embeddings_list: List[tf.Tensor],
                  is_training: bool = True):
         sparse_embeddings_list = [tf.contrib.layers.layer_norm(inputs=emb,
                                                                begin_norm_axis=-1,

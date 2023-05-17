@@ -1,5 +1,5 @@
 import tensorflow as tf
-from typing import List
+from typing import List, Union
 
 from Recommendation.Utils.core import dnn_layer
 
@@ -81,10 +81,10 @@ class MIND:
         """
         return self.all_item_embedding
 
-    def __call__(self, user_feat_inputs: List,
-                 behavior_item_inputs: List,
-                 target_item_inputs: List,
-                 seq_len: tf.Variable,
+    def __call__(self, user_feat_inputs: List[tf.Tensor],
+                 behavior_item_inputs: List[tf.Tensor],
+                 target_item_inputs: List[tf.Tensor],
+                 seq_len: tf.Tensor,
                  training: bool):
         """
 
