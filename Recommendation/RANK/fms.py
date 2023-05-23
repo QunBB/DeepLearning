@@ -78,9 +78,13 @@ class FMs:
         else:
             self.interaction_func = self._fm_interaction
 
+        # For DeepFM
+        self._embedding_output = []
+
     def __call__(self,
                  sparse_inputs_dict: OrderedDictType[str, tf.Tensor],
-                 dense_inputs_dict: OrderedDictType[str, tf.Tensor]):
+                 dense_inputs_dict: OrderedDictType[str, tf.Tensor],
+                 add_sigmoid: bool = True):
         """
 
         :param sparse_inputs_dict: 离散特征，经过LabelEncoder之后的输入
@@ -100,11 +104,14 @@ class FMs:
             linear_logit.append(self._get_linear_logit(w=self.weights_table[name], x=x, v=v))
             interactions.append(v * tf.reshape(x, [-1, 1]))
 
+        self._embedding_output = interactions
+
         fms_logit = self.interaction_func(interactions)
 
         final_logit = tf.add_n(linear_logit + [fms_logit])
 
-        final_logit = tf.nn.sigmoid(final_logit)
+        if add_sigmoid:
+            final_logit = tf.nn.sigmoid(final_logit)
 
         return final_logit
 
@@ -159,3 +166,6 @@ class FMs:
             logits.append(tf.reshape(_logit, [-1]))
 
         return tf.add_n(logits)
+
+    def get_embedding_output(self):
+        return self._embedding_output

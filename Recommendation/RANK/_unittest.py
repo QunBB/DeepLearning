@@ -161,5 +161,42 @@ class TestDeepCrossing(BaseTestCase):
         super().set_output(output)
 
 
+class TestDCN(BaseTestCase):
+
+    def test(self):
+        from Recommendation.RANK.dcn import DCN
+
+        model = DCN(input_dim=512,
+                    cross_layer_num=3,
+                    cross_network_type='matrix',
+                    low_rank_dim=64,
+                    dnn_hidden_size=[512, 128],
+                    )
+
+        output = model(tf.convert_to_tensor(np.random.random([32, 512]).astype(np.float32)))
+
+        super().set_output(output)
+
+
+class TestDeepFM(BaseTestCase):
+
+    def test(self):
+        from Recommendation.RANK.deepfm import DeepFM, Field, LinearTerms, FMType
+
+        model = DeepFM([Field(name='c1', vocabulary_size=100),
+                        Field(name='c2', vocabulary_size=100),
+                        Field(name='d1')],
+                       dnn_hidden_size=[256, 256],
+                       embedding_dim=4,
+                       linear_type=LinearTerms.LW,
+                       model_type=FMType.FM)
+
+        sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
+
+        output = model(sparse_inputs_dict, dense_inputs_dict)
+
+        super().set_output(output)
+
+
 if __name__ == '__main__':
     unittest.main()
