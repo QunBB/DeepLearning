@@ -45,6 +45,7 @@
 - **ctr预估之FMs系列:FM/FFM/FwFM/FEFM**：https://zhuanlan.zhihu.com/p/613030015
 - **ctr预估之DNN系列模型:FNN/PNN/DeepCrossing**：https://zhuanlan.zhihu.com/p/623567076
 - **ctr预估之Wide&Deep系列模型:DeepFM/DCN**：https://zhuanlan.zhihu.com/p/631668163
+- **ctr预估之Wide&Deep系列(下):NFM/xDeepFM**：https://zhuanlan.zhihu.com/p/634584585
 
 # 4. TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
