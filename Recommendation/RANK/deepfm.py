@@ -1,16 +1,21 @@
+"""
+> 论文：DeepFM: A Factorization-Machine based Neural Network for CTR Prediction
+>
+> 地址：https://www.ijcai.org/proceedings/2017/0239.pdf
+"""
 import tensorflow as tf
 from typing import List, Optional, Callable
 from typing import Dict as OrderedDictType
 from functools import partial
 
-from .fms import LinearTerms, FMType, Field, FMs
+from .fms import FMs
+from ..Utils.type_declaration import LinearTerms, FMType, Field
 from ..Utils.core import dnn_layer
 
 
 class DeepFM:
     def __init__(self,
                  fields_list: List[Field],
-                 embedding_dim: int,
                  dnn_hidden_size: List[int],
                  dnn_activation: Optional[Callable] = None,
                  dnn_dropout: Optional[float] = 0.,
@@ -20,7 +25,7 @@ class DeepFM:
                  model_type: FMType = FMType.FM,
                  emb_l2_reg: float = 0.
                  ):
-        self.fm = FMs(fields_list, embedding_dim, linear_type, model_type, emb_l2_reg)
+        self.fm = FMs(fields_list, linear_type, model_type, emb_l2_reg)
 
         self.dnn_layer = partial(dnn_layer, hidden_size=dnn_hidden_size, activation=dnn_activation,
                                  dropout=dnn_dropout, use_bn=dnn_use_bn, l2_reg=dnn_l2_reg)
@@ -29,6 +34,12 @@ class DeepFM:
     def __call__(self, sparse_inputs_dict: OrderedDictType[str, tf.Tensor],
                  dense_inputs_dict: OrderedDictType[str, tf.Tensor],
                  is_training: bool = True):
+        """
+        未经过embedding layer的输入
+        :param sparse_inputs_dict: 离散特征，经过LabelEncoder之后的输入
+        :param dense_inputs_dict: 连续值特征
+        :return:
+        """
         fm_logit = self.fm(sparse_inputs_dict, dense_inputs_dict, add_sigmoid=False)
 
         embedding_output = self.fm.get_embedding_output()

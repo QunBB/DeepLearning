@@ -1,9 +1,17 @@
+"""
+论文：FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
+
+地址：https://arxiv.org/abs/1905.09433
+
+论文：FiBiNet++:Improving FiBiNet by Greatly Reducing Model Size for CTR Prediction
+
+地址：https://arxiv.org/pdf/2209.05016.pdf
+"""
 import tensorflow as tf
 from typing import List, Callable
 
 from ..Utils.core import dnn_layer
-from ..Utils.senet import SENet
-from ..Utils.bilinear import BiLinear
+from ..Utils.interaction import SENet, BiLinear
 
 
 class FiBiNet:

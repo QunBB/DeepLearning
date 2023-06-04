@@ -6,21 +6,12 @@
     论文：Product-based Neural Networks for User Response Prediction
     地址：https://arxiv.org/pdf/1611.00144.pdf
 """
-from typing import List, Union, Callable
+from typing import List, Union, Callable, Optional
 from enum import IntEnum
 import tensorflow as tf
 
 from ..Utils.core import dnn_layer
-
-
-class KernelType(IntEnum):
-    """
-    0-2对应KPNN不同kernel形式，3对应PIN的micro net
-    """
-    Num = 0
-    Vec = 1
-    Mat = 2
-    Net = 3  # PIN
+from ..Utils.type_declaration import KernelType
 
 
 class PNN:
@@ -34,9 +25,9 @@ class PNN:
                  dnn_hidden_size: List[int],
                  add_inner_product: bool,
                  add_outer_product: bool,
-                 kernel_type: Union[None, KernelType] = None,
-                 micro_net_size: Union[None, int] = None,
-                 micro_net_activation: Union[None, Callable] = None,
+                 kernel_type: Optional[KernelType] = None,
+                 micro_net_size: Optional[int] = None,
+                 micro_net_activation: Optional[Callable] = None,
                  product_layer_size: int = 0,
                  dnn_l2_reg: float = 0.,
                  emb_l2_reg: float = 0.,

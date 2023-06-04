@@ -5,6 +5,8 @@ import os
 from collections import OrderedDict
 import tensorflow as tf
 
+from Recommendation.Utils.type_declaration import *
+
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 
@@ -46,10 +48,9 @@ class TestFMs(BaseTestCase):
     def test(self):
         from Recommendation.RANK import fms
 
-        model = fms.FMs([fms.Field(name='c1', vocabulary_size=100),
-                         fms.Field(name='c2', vocabulary_size=100),
-                         fms.Field(name='d1')],
-                        embedding_dim=4,
+        model = fms.FMs([Field(name='c1', vocabulary_size=100),
+                         Field(name='c2', vocabulary_size=100),
+                         Field(name='d1')],
                         linear_type=fms.LinearTerms.FiLV,
                         model_type=fms.FMType.FEFM)
 
@@ -71,10 +72,9 @@ class TestFNN(BaseTestCase):
         def _fms_pretrain():
             sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
 
-            model = fms.FMs([fms.Field(name='c1', vocabulary_size=100),
-                             fms.Field(name='c2', vocabulary_size=100),
-                             fms.Field(name='d1')],
-                            embedding_dim=4)
+            model = fms.FMs([Field(name='c1', vocabulary_size=100),
+                             Field(name='c2', vocabulary_size=100),
+                             Field(name='d1')])
             output = model(sparse_inputs_dict, dense_inputs_dict)
             print(output)
 
@@ -93,9 +93,9 @@ class TestFNN(BaseTestCase):
 
         sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
 
-        model = fnn.FNN([fnn.Field(name='c1', vocabulary_size=100),
-                         fnn.Field(name='c2', vocabulary_size=100),
-                         fnn.Field(name='d1')],
+        model = fnn.FNN([Field(name='c1', vocabulary_size=100),
+                         Field(name='c2', vocabulary_size=100),
+                         Field(name='d1')],
                         embedding_dim=4,
                         dnn_hidden_size=[256, 128],
                         fms_checkpoint='fms.ckpt'
@@ -181,15 +181,54 @@ class TestDCN(BaseTestCase):
 class TestDeepFM(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.deepfm import DeepFM, Field, LinearTerms, FMType
+        from Recommendation.RANK.deepfm import DeepFM
 
         model = DeepFM([Field(name='c1', vocabulary_size=100),
                         Field(name='c2', vocabulary_size=100),
                         Field(name='d1')],
                        dnn_hidden_size=[256, 256],
-                       embedding_dim=4,
                        linear_type=LinearTerms.LW,
                        model_type=FMType.FM)
+
+        sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
+
+        output = model(sparse_inputs_dict, dense_inputs_dict)
+
+        super().set_output(output)
+
+
+class TestNFM(BaseTestCase):
+
+    def test(self):
+        from Recommendation.RANK import nfm
+
+        model = nfm.NFM([nfm.Field(name='c1', vocabulary_size=100, dim=10),
+                         nfm.Field(name='c2', vocabulary_size=100, dim=10),
+                         nfm.Field(name='d1', dim=10)],
+                        linear_type=nfm.LinearTerms.FiLV,
+                        dnn_hidden_size=[512, 128],
+                        dnn_activation=tf.nn.relu)
+
+        sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
+
+        output = model(sparse_inputs_dict, dense_inputs_dict)
+
+        super().set_output(output)
+
+
+class TestxDeepFM(BaseTestCase):
+
+    def test(self):
+        from Recommendation.RANK.xdeepfm import xDeepFM
+
+        model = xDeepFM([Field(name='c1', vocabulary_size=100, dim=10),
+                         Field(name='c2', vocabulary_size=100, dim=10),
+                         Field(name='d1', dim=10)],
+                        cross_layer_sizes=[10, 20],
+                        dnn_hidden_size=[128, 64],
+                        dnn_activation=tf.nn.relu,
+                        split_connect=True,
+                        )
 
         sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
 

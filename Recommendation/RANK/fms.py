@@ -8,62 +8,25 @@
 论文：Field-Embedded Factorization Machines for Click-through rate prediction
 地址：https://arxiv.org/pdf/2009.09931.pdf
 """
-import tensorflow as tf
-from typing import List, Union
-from typing import Dict as OrderedDictType
-from dataclasses import dataclass
-from enum import IntEnum
 import itertools
+from typing import Dict as OrderedDictType
+from typing import List
 
+import tensorflow as tf
 
-class LinearTerms(IntEnum):
-    """FwFMs中的线性项"""
-    LW = 0
-    FeLV = 1
-    FiLV = 2
-
-
-class FMType(IntEnum):
-    """FMs选项"""
-    FM = 1
-    FwFM = 2
-    FEFM = 3
-
-
-@dataclass
-class Field:
-    name: str
-    vocabulary_size: int = 1  # dense类型为1
+from ..Utils.interaction import LinearEmbedding
+from ..Utils.type_declaration import LinearTerms, FMType, Field
 
 
 class FMs:
     def __init__(self,
                  fields_list: List[Field],
-                 embedding_dim: int,
                  linear_type: LinearTerms = LinearTerms.LW,
                  model_type: FMType = FMType.FM,
                  l2_reg: float = 0.):
-        self.embeddings_table = {}
-        self.weights_table = {}
         self.num_fields = len(fields_list)
 
-        for field in fields_list:
-            # embeddings 隐向量
-            self.embeddings_table[field.name] = tf.get_variable('emb_' + field.name,
-                                                                shape=[field.vocabulary_size, embedding_dim],
-                                                                regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
-
-            # 线性项权重
-            if linear_type == LinearTerms.LW:
-                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[field.vocabulary_size],
-                                                                 regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
-            elif linear_type == LinearTerms.FeLV:
-                self.weights_table[field.name] = tf.get_variable('w_' + field.name,
-                                                                 shape=[field.vocabulary_size, embedding_dim],
-                                                                 regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
-            else:
-                self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[1, embedding_dim],
-                                                                 regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
+        embedding_dim = fields_list[0].dim  # 所有field embeddings的维度应该相同
 
         if model_type == FMType.FwFM:
             self.interaction_strengths = tf.get_variable('interaction_strengths',
@@ -81,57 +44,35 @@ class FMs:
         # For DeepFM
         self._embedding_output = []
 
+        self.linear = LinearEmbedding(fields_list, linear_type)
+
+        self.global_w = tf.get_variable('global_w', shape=[1], dtype=tf.float32,
+                                        initializer=tf.zeros_initializer())
+
     def __call__(self,
                  sparse_inputs_dict: OrderedDictType[str, tf.Tensor],
                  dense_inputs_dict: OrderedDictType[str, tf.Tensor],
                  add_sigmoid: bool = True):
         """
-
+        未经过embedding layer的输入
         :param sparse_inputs_dict: 离散特征，经过LabelEncoder之后的输入
         :param dense_inputs_dict:
         :return:
         """
-        linear_logit = []
-        interactions = []
+        assert self.num_fields == len(sparse_inputs_dict) + len(dense_inputs_dict)
 
-        for name, x in sparse_inputs_dict.items():
-            v = tf.nn.embedding_lookup(self.embeddings_table[name], x)
-            linear_logit.append(self._get_linear_logit(w=self.weights_table[name], i=x, v=v))
-            interactions.append(v)
+        embeddings, linear_logit = self.linear(sparse_inputs_dict, dense_inputs_dict)
 
-        for name, x in dense_inputs_dict.items():
-            v = tf.reshape(self.embeddings_table[name][0], [1, -1])
-            linear_logit.append(self._get_linear_logit(w=self.weights_table[name], x=x, v=v))
-            interactions.append(v * tf.reshape(x, [-1, 1]))
+        self._embedding_output = embeddings
 
-        self._embedding_output = interactions
+        fms_logit = self.interaction_func(embeddings)
 
-        fms_logit = self.interaction_func(interactions)
-
-        final_logit = tf.add_n(linear_logit + [fms_logit])
+        final_logit = linear_logit + fms_logit + self.global_w
 
         if add_sigmoid:
             final_logit = tf.nn.sigmoid(final_logit)
 
         return final_logit
-
-    def _get_linear_logit(self,
-                          w: tf.Tensor,
-                          i: Union[int, tf.Tensor] = 0,
-                          x: Union[int, tf.Tensor] = 1,
-                          v: Union[int, tf.Tensor] = 1
-                          ):
-        """线性项计算"""
-        shape = w.shape.as_list()
-
-        if len(shape) == 1:  # LM
-            return tf.gather(w, i) * x
-        elif len(shape) == 2 and shape[0] == 1:  # FiLV
-            return tf.reduce_sum(w * v, axis=1) * x
-        elif len(shape) == 2 and shape[0] > 1:  # FeLV
-            return tf.reduce_sum(tf.gather(w, i) * v, axis=1) * x
-        else:
-            raise ValueError
 
     def _fm_interaction(self, interactions):
         interactions = tf.stack(interactions, axis=1)
