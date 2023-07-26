@@ -1,5 +1,9 @@
 **这里提供了在Google Colab或者kaggle的GPU算力上免费搭建stable-diffusion-webui，进行AI绘画的notebook**
 
+原理讲解：
+
+1. **AI绘画Stable Diffusion原理之Autoencoder-Latent**：https://zhuanlan.zhihu.com/p/645939505
+
 stable diffusion有一个很大的优势就是基于各式各样的模型，我们可以进行不同风格的AI绘画。
 
 - stable diffusion的基础模型可以在[hugging face](https://huggingface.co/stabilityai)下载

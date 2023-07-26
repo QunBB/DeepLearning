@@ -82,3 +82,12 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 - **Stochastic Weight Averaging (SWA)、Exponential Moving Average(EMA)**：https://zhuanlan.zhihu.com/p/554955968
 - **(unbalance)分类模型-类别不均衡问题之loss设计 & Label Smoothing**：https://zhuanlan.zhihu.com/p/582312784
 
+# 7. 多模态
+
+项目文件夹：[MultiModal](https://github.com/QunBB/DeepLearning/tree/main/MultiModal)
+
+## 7.1 Stable Diffusion
+
+项目文件夹：[Stable Diffusion](https://github.com/QunBB/DeepLearning/tree/main/MultiModal/stable_diffusion)
+
+**AI绘画Stable Diffusion原理之Autoencoder-Latent**：https://zhuanlan.zhihu.com/p/645939505
