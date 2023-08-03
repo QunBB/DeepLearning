@@ -39,8 +39,8 @@ class PLE:
             experts = self.extraction_network(inputs, is_training=is_training)
 
             assert len(experts) == len(self.target_dict)
-            for name, one_expert in zip(self.target_dict.keys(), experts):
-                ple_layer[name] = one_expert
+            for name in self.target_dict:
+                ple_layer[name] = experts[name]
 
         # tower层输出每个task的logits
         with tf.variable_scope("tower_layer"):
@@ -60,7 +60,7 @@ class PLE:
                 output = tf.layers.dense(tower_layer[name], self.target_dict[name])
                 logits[name] = tf.nn.softmax(output)
 
-                pred[name] = tf.argmax(logits[name])
+                pred[name] = tf.argmax(logits[name], axis=-1)
 
         return logits, pred
 
@@ -72,58 +72,62 @@ class PLE:
         :return:
         """
         # 第一层的输入是模型的原始输入
-        outputs = inputs
+        outputs = {name: inputs for name in list(self.target_dict.keys()) + ["shared"]}
+        # 其他层的话，任务k的独享expert融合了上一层网络中任务k的独享expert和共享expert，而共享expert则融合了上一层所有的expert
 
         for level in range(self.num_levels):
-            # 如果不是第一层，那么输入是多个上层的输出expert组成的列表
-            # 此时，需要进行fusion：一般是拼接、相乘、相加几种融合方式
-            # 这里使用相加拼接相乘
-            if isinstance(outputs, list):
-                outputs = tf.concat([reduce(lambda x, y: x + y, outputs),
-                                     reduce(lambda x, y: x * y, outputs)],
-                                    axis=-1)
 
             # 生成多个experts
             with tf.variable_scope("Mixture-of-Experts"):
-                mixture_experts = []
+                mixture_experts = {}
                 for name in list(self.target_dict.keys()) + ["shared"]:
                     # 除了共享的expert，每个task拥有自己的expert
                     for i in range(self.num_experts):
                         # expert一般是一层全连接层
-                        expert_layer = self._mlp_layer(outputs,
+                        expert_layer = self._mlp_layer(outputs[name],
                                                        sizes=[self.experts_layer_size[level]],
                                                        is_training=is_training,
                                                        l2_reg=self.l2_reg,
                                                        dropout=self.dropout,
                                                        use_bn=True,
                                                        scope="{}_expert_{}_level_{}".format(name, i, level))
-                        mixture_experts.append(expert_layer)
-
-            # 如果是最后一层，那么gate的数量应该是task的数量
-            # 其他层的话，gate的数量一般等于experts的数量
-            if level == self.num_levels - 1:
-                num_gates = len(self.target_dict)
-            else:
-                num_gates = self.num_experts
+                        mixture_experts.setdefault(name, []).append(expert_layer)
 
             # 生成不同'输出expert'或task的gate
             with tf.variable_scope("Multi-gate"):
-                multi_gate = []
-                for i in range(num_gates):
-                    # 每个task拥有独立一个gate
-                    # 每个gate的维度为 [batch_size, num_experts]
-                    gate = tf.layers.dense(inputs, units=self.num_experts*(len(self.target_dict)+1),
+                multi_gate = {}
+                for name in list(self.target_dict.keys()) + ["shared"]:
+                    # 每个任务拥有独立一个gate
+                    # 任务k的独享expert和共享expert融合作为下一层的输入，而共享expert则融合了所有的expert
+                    # 因此，共享expert的gate的维度为 [batch_size, num_experts*(num_labels+1)]
+                    # 而任务expert的gate的维度为 [batch_size, num_experts*2]
+                    if name == 'shared':
+                        gate_dim = self.num_experts*(len(self.target_dict)+1)
+                    else:
+                        gate_dim = self.num_experts * 2
+                    gate = tf.layers.dense(inputs, units=gate_dim,
                                            kernel_initializer=slim.variance_scaling_initializer(),
                                            kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
-                                           name="gate_{}_level_{}".format(i, level))
+                                           name="gate_{}_level_{}".format(name, level))
                     gate = tf.nn.softmax(gate)
-                    multi_gate.append(gate)
+                    multi_gate[name] = gate
 
-            # 每个'输出expert'或task，通过自己gate的权重分布，合并expert
+            # 任务k的独享expert和共享expert融合作为下一层的输入，而共享expert则融合了所有的expert
+            # 通过自己gate的权重分布进行expert融合
             with tf.variable_scope("combine_gate_expert"):
-                ple_layer = []
-                for i in range(num_gates):
-                    ple_layer.append(self._combine_expert_gate(mixture_experts, multi_gate[i]))
+                ple_layer = {}
+                for name in list(self.target_dict.keys()) + ["shared"]:
+                    if name == 'shared':
+                        # 最后一层是每个task的最终输出，无需合并共享expert
+                        if level == self.num_levels - 1:
+                            continue
+                        merge_experts = []
+                        for _name in list(self.target_dict.keys()) + ["shared"]:
+                            merge_experts.extend(mixture_experts[_name])
+                    else:
+                        merge_experts = mixture_experts[name] + mixture_experts['shared']
+
+                    ple_layer[name] = self._combine_expert_gate(merge_experts, multi_gate[name])
 
             outputs = ple_layer
         return outputs
@@ -176,6 +180,7 @@ class PLE:
 
 
 if __name__ == '__main__':
+    import numpy as np
     model = PLE(target_dict={"click": 2, "like": 2},
                 num_experts=5,
                 num_levels=2,
@@ -188,3 +193,7 @@ if __name__ == '__main__':
     logits, pred = model(inputs, is_training=True)
 
     print(logits, "\n", pred)
+
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    print(sess.run([logits, pred], feed_dict={inputs: np.random.random([6, 2056])}))

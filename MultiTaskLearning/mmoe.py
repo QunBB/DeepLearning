@@ -60,7 +60,7 @@ class MMoE:
                 output = tf.layers.dense(tower_layer[name], self.target_dict[name])
                 logits[name] = tf.nn.softmax(output)
 
-                pred[name] = tf.argmax(logits[name])
+                pred[name] = tf.argmax(logits[name], axis=-1)
 
         return logits, pred
 
