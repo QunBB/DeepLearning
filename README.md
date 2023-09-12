@@ -90,4 +90,5 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 项目文件夹：[Stable Diffusion](https://github.com/QunBB/DeepLearning/tree/main/MultiModal/stable_diffusion)
 
-**AI绘画Stable Diffusion原理之Autoencoder-Latent**：https://zhuanlan.zhihu.com/p/645939505
+- **AI绘画Stable Diffusion原理之VQGANs/隐空间/Autoencoder**：https://zhuanlan.zhihu.com/p/645939505
+- **AI绘画Stable Diffusion原理之扩散模型DDPM**：https://zhuanlan.zhihu.com/p/645939505
