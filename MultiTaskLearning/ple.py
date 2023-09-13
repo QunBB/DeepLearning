@@ -1,3 +1,4 @@
+from typing import List, Dict
 import tensorflow as tf
 from functools import reduce
 
@@ -5,11 +6,11 @@ import tensorflow.contrib.slim as slim
 
 
 class PLE:
-    def __init__(self, target_dict: dict,
+    def __init__(self, target_dict: Dict[str, int],
                  num_experts: int,
                  num_levels: int,
-                 experts_layer_size: list,
-                 tower_layer_size: list,
+                 experts_layer_size: List[int],
+                 tower_layer_size: List[int],
                  l2_reg: float,
                  dropout: float):
         """
@@ -32,7 +33,9 @@ class PLE:
         self.l2_reg = l2_reg
         self.dropout = dropout
 
-    def __call__(self, inputs, is_training):
+    def __call__(self,
+                 inputs: tf.Tensor,
+                 is_training: bool):
         # 多层的extraction_network
         ple_layer = {}
         with tf.variable_scope("PLE"):
@@ -64,7 +67,10 @@ class PLE:
 
         return logits, pred
 
-    def extraction_network(self, inputs, is_training):
+    def extraction_network(self,
+                           inputs: tf.Tensor,
+                           is_training: bool
+                           ):
         """
         兼容单层和多层的PLE
         :param inputs: 原始的输入
@@ -132,7 +138,9 @@ class PLE:
             outputs = ple_layer
         return outputs
 
-    def _combine_expert_gate(self, mixture_experts, gate):
+    def _combine_expert_gate(self,
+                             mixture_experts: List[tf.Tensor],
+                             gate: tf.Tensor):
         """
         多个expert通过gate进行合并
         :param mixture_experts: 多个experts的list
