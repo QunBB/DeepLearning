@@ -237,5 +237,40 @@ class TestxDeepFM(BaseTestCase):
         super().set_output(output)
 
 
+class TestContextNet(BaseTestCase):
+
+    def test(self):
+        from Recommendation.RANK.contextnet import ContextNet
+
+        model = ContextNet(num_block=3,
+                           agg_dim=1024,
+                           ffn_type='FFN')
+
+        output = model(tf.convert_to_tensor(np.random.random([32, 10, 64]).astype(np.float32)))
+
+        super().set_output(output)
+
+
+class TestMaskNet(BaseTestCase):
+
+    def test(self):
+        from Recommendation.RANK.masknet import MaskNet
+
+        model = MaskNet(agg_dim=1024,
+                        num_mask_block=3,
+                        mask_block_ffn_size=[256, 128, 64],
+                        masknet_type='serial')
+
+        # model = MaskNet(agg_dim=1024,
+        #                 num_mask_block=3,
+        #                 mask_block_ffn_size=256,
+        #                 masknet_type='parallel',
+        #                 hidden_layer_size=[256, 128])
+
+        output = model(tf.convert_to_tensor(np.random.random([32, 10, 64]).astype(np.float32)))
+
+        super().set_output(output)
+
+
 if __name__ == '__main__':
     unittest.main()

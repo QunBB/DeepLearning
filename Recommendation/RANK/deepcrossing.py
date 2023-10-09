@@ -16,6 +16,13 @@ class DeepCrossing:
                  dropout: float = 0.,
                  use_bn: bool = True
                  ):
+        """
+
+        :param residual_size: 每一层残差网络的中间层size
+        :param l2_reg:
+        :param dropout:
+        :param use_bn:
+        """
         self.residual_size = residual_size
         self.l2_reg = l2_reg
         self.dropout = dropout

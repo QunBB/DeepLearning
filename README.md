@@ -46,6 +46,7 @@
 - **ctr预估之DNN系列模型:FNN/PNN/DeepCrossing**：[专栏](https://zhuanlan.zhihu.com/p/623567076)
 - **ctr预估之Wide&Deep系列模型:DeepFM/DCN**：[专栏](https://zhuanlan.zhihu.com/p/631668163)
 - **ctr预估之Wide&Deep系列(下):NFM/xDeepFM**：[专栏](https://zhuanlan.zhihu.com/p/634584585)
+- **CTR特征建模：ContextNet & MaskNet(Twitter在用的排序模型)**：[专栏](https://zhuanlan.zhihu.com/p/660375034)
 
 # 4. TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
