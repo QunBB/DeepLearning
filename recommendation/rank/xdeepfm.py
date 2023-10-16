@@ -8,9 +8,9 @@ from typing import Optional, Callable, List, Union
 from typing import Dict as OrderedDictType
 from functools import partial
 
-from ..Utils.core import dnn_layer
-from ..Utils.interaction import LinearEmbedding
-from ..Utils.type_declaration import Field, LinearTerms
+from ..utils.core import dnn_layer
+from ..utils.interaction import LinearEmbedding
+from ..utils.type_declaration import Field, LinearTerms
 
 
 class xDeepFM:

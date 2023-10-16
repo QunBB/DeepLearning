@@ -1,6 +1,6 @@
 # 1. tensorflow使用
 
-项目文件夹：[TensorFlow](https://github.com/QunBB/DeepLearning/tree/main/TensorFlow)
+项目文件夹：[TensorFlow](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow)
 
 - **batch_normalization**: [专栏](https://zhuanlan.zhihu.com/p/360842139)
 - **dataset.shuffle、batch、repeat:** [专栏](https://zhuanlan.zhihu.com/p/360843167)
@@ -14,20 +14,20 @@
 
 # 2. 多任务学习MTL
 
-项目文件夹：[MultiTaskLearning](https://github.com/QunBB/DeepLearning/tree/main/MultiTaskLearning)
+项目文件夹：[multitasklearning](https://github.com/QunBB/DeepLearning/tree/main/multitasklearning)
 
 - **shared_bottom、mmoe、ple模型介绍:** [专栏](https://zhuanlan.zhihu.com/p/425209494)
 - **多目标优化-Uncertainty Weight、GradNorm、Dynamic Weight Average、Pareto-Eficient**：[专栏](https://zhuanlan.zhihu.com/p/456089764)
 
 # 3. 推荐系统
 
-项目文件夹：[Recommendation](https://github.com/QunBB/DeepLearning/tree/main/Recommendation)
+项目文件夹：[recommendation](https://github.com/QunBB/DeepLearning/tree/main/recommendation)
 
 - **ctr训练提速(超大batch size)-CowClip**：[专栏](https://zhuanlan.zhihu.com/p/557451365)
 
 ## 3.1 Match(召回)
 
-项目文件夹：[Recommendation/Match](https://github.com/QunBB/DeepLearning/tree/main/Recommendation/Match)
+项目文件夹：[recommendation/match](https://github.com/QunBB/DeepLearning/tree/main/recommendation/match)
 
 - **多兴趣召回MIND**: [专栏](https://zhuanlan.zhihu.com/p/463064543)
 - **多兴趣召回ComiRec**: [专栏](https://zhuanlan.zhihu.com/p/568781562)
@@ -37,9 +37,9 @@
 - **深入浅出地理解Youtube DNN推荐模型**: [专栏](https://zhuanlan.zhihu.com/p/405907646)
 - **引入对偶增强向量的双塔召回模型**: [专栏](https://zhuanlan.zhihu.com/p/608636233)
 
-## 3.2 RANK(排序)
+## 3.2 Rank(排序)
 
-项目文件夹：[Recommendation/RANK](https://github.com/QunBB/DeepLearning/tree/main/Recommendation/RANK)
+项目文件夹：[recommendation/rank](https://github.com/QunBB/DeepLearning/tree/main/recommendation/rank)
 
 - **ctr特征重要性建模：FiBiNet&FiBiNet++模型**：[专栏](https://zhuanlan.zhihu.com/p/603262632)
 - **ctr预估之FMs系列:FM/FFM/FwFM/FEFM**：[专栏](https://zhuanlan.zhihu.com/p/613030015)
@@ -55,13 +55,13 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 ## 4.1 Triton
 
-项目文件夹：[Triton](https://github.com/QunBB/DeepLearning/tree/main/Triton)
+项目文件夹：[triton](https://github.com/QunBB/DeepLearning/tree/main/triton)
 
 - **TensorRT&Triton学习笔记(一)**: triton和模型部署+client：[专栏](https://zhuanlan.zhihu.com/p/482170985)
 
 # 5. 自然语言处理NLP
 
-项目文件夹：[NLP](https://github.com/QunBB/DeepLearning/tree/main/NLP)
+项目文件夹：[nlp](https://github.com/QunBB/DeepLearning/tree/main/nlp)
 
 ## 5.1 bert句向量
 
@@ -69,13 +69,13 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 ## 5.2 bert系列
 
-**BERT预训练代码(tensorflow和torch版本)：[NLP/masked_language_model](https://github.com/QunBB/DeepLearning/tree/main/NLP/masked_language_model)**
+**BERT预训练代码(tensorflow和torch版本)：[NLP/masked_language_model](https://github.com/QunBB/DeepLearning/tree/main/nlp/masked_language_model)**
 
 - **BERT模型系列大全解读**：[专栏](https://zhuanlan.zhihu.com/p/598095233)
 
 # 6. 深度学习trick
 
-项目文件夹：[Trick](https://github.com/QunBB/DeepLearning/tree/main/Trick)
+项目文件夹：[trick](https://github.com/QunBB/DeepLearning/tree/main/trick)
 
 带pt后缀的为pytorch实现版本，不带后缀的则为tensorflow版本。
 
@@ -85,11 +85,11 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 # 7. 多模态
 
-项目文件夹：[MultiModal](https://github.com/QunBB/DeepLearning/tree/main/MultiModal)
+项目文件夹：[multimodal](https://github.com/QunBB/DeepLearning/tree/main/multimodal)
 
 ## 7.1 Stable Diffusion
 
-项目文件夹：[Stable Diffusion](https://github.com/QunBB/DeepLearning/tree/main/MultiModal/stable_diffusion)
+项目文件夹：[Stable Diffusion](https://github.com/QunBB/DeepLearning/tree/main/multimodal/stable_diffusion)
 
 - **AI绘画Stable Diffusion原理之VQGANs/隐空间/Autoencoder**：[专栏](https://zhuanlan.zhihu.com/p/645939505)
 - **AI绘画Stable Diffusion原理之扩散模型DDPM**：[专栏](https://zhuanlan.zhihu.com/p/645939505)

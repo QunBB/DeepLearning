@@ -9,8 +9,8 @@ from typing import Dict as OrderedDictType
 from functools import partial
 
 from .fms import FMs
-from ..Utils.type_declaration import LinearTerms, FMType, Field
-from ..Utils.core import dnn_layer
+from ..utils.type_declaration import LinearTerms, FMType, Field
+from ..utils.core import dnn_layer
 
 
 class DeepFM:

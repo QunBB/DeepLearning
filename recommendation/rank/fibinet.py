@@ -10,8 +10,8 @@
 import tensorflow as tf
 from typing import List, Callable
 
-from ..Utils.core import dnn_layer
-from ..Utils.interaction import SENet, BiLinear
+from ..utils.core import dnn_layer
+from ..utils.interaction import SENet, BiLinear
 
 
 class FiBiNet:

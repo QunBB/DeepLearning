@@ -9,9 +9,9 @@ from typing import List, Callable
 
 import tensorflow as tf
 
-from ..Utils.core import dnn_layer
-from ..Utils.interaction import LinearEmbedding
-from ..Utils.type_declaration import LinearTerms, Field
+from ..utils.core import dnn_layer
+from ..utils.interaction import LinearEmbedding
+from ..utils.type_declaration import LinearTerms, Field
 
 
 class NFM:

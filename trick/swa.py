@@ -40,7 +40,7 @@ def apply_swa(checkpoint_list: list,
 
 if __name__ == '__main__':
     # 测试程序
-    from NLP.sentence_bert.bert import BertConfig, BertModel
+    from nlp.sentence_bert.bert import BertConfig, BertModel
     model = BertModel(config=BertConfig.from_json_file('chinese_roberta_wwm_ext_L-12_H-768_A-12/bert_config.json'),
                       is_training=False,
                       input_ids=tf.placeholder(tf.int32, [None, 128]))

@@ -58,7 +58,7 @@ huggingface-hub==0.4.0
 ```sh
 git clone https://github.com/QunBB/DeepLearning.git
 
-cd DeepLearning/NLP/masked_language_model/tf
+cd DeepLearning/nlp/masked_language_model/tf
 
 pip install -r requirements.txt
 ```
@@ -139,7 +139,7 @@ python run_pretraining_sess.py \
 ```sh
 git clone https://github.com/QunBB/DeepLearning.git
 
-cd DeepLearning/NLP/masked_language_model/pt
+cd DeepLearning/nlp/masked_language_model/pt
 
 pip install -r requirements.txt
 ```

@@ -9,8 +9,8 @@ from typing import List, Union
 import tensorflow as tf
 from dataclasses import dataclass
 
-from ..Utils.core import dnn_layer
-from ..Utils.train_utils import get_assignment_map_from_checkpoint
+from ..utils.core import dnn_layer
+from ..utils.train_utils import get_assignment_map_from_checkpoint
 
 
 @dataclass

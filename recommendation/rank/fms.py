@@ -14,8 +14,8 @@ from typing import List
 
 import tensorflow as tf
 
-from ..Utils.interaction import LinearEmbedding
-from ..Utils.type_declaration import LinearTerms, FMType, Field
+from ..utils.interaction import LinearEmbedding
+from ..utils.type_declaration import LinearTerms, FMType, Field
 
 
 class FMs:

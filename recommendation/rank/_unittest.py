@@ -5,7 +5,7 @@ import os
 from collections import OrderedDict
 import tensorflow as tf
 
-from Recommendation.Utils.type_declaration import *
+from recommendation.utils.type_declaration import *
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
@@ -46,7 +46,7 @@ class BaseTestCase(unittest.TestCase):
 class TestFMs(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK import fms
+        from recommendation.rank import fms
 
         model = fms.FMs([Field(name='c1', vocabulary_size=100),
                          Field(name='c2', vocabulary_size=100),
@@ -64,8 +64,8 @@ class TestFMs(BaseTestCase):
 class TestFNN(BaseTestCase):
 
     def test_fnn(self):
-        from Recommendation.RANK import fms
-        from Recommendation.RANK import fnn
+        from recommendation.rank import fms
+        from recommendation.rank import fnn
 
         tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -108,7 +108,7 @@ class TestFNN(BaseTestCase):
 class TestFiBiNet(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.fibinet import FiBiNet
+        from recommendation.rank.fibinet import FiBiNet
 
         batch_size = 32
 
@@ -130,7 +130,7 @@ class TestFiBiNet(BaseTestCase):
 class TestPNN(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK import pnn
+        from recommendation.rank import pnn
 
         model = pnn.PNN(num_fields=20,
                         dim=64,
@@ -150,7 +150,7 @@ class TestPNN(BaseTestCase):
 class TestDeepCrossing(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.deepcrossing import DeepCrossing
+        from recommendation.rank.deepcrossing import DeepCrossing
 
         model = DeepCrossing(residual_size=[256, 256, 256],
                              l2_reg=1e-5,
@@ -164,7 +164,7 @@ class TestDeepCrossing(BaseTestCase):
 class TestDCN(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.dcn import DCN
+        from recommendation.rank.dcn import DCN
 
         model = DCN(input_dim=512,
                     cross_layer_num=3,
@@ -181,7 +181,7 @@ class TestDCN(BaseTestCase):
 class TestDeepFM(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.deepfm import DeepFM
+        from recommendation.rank.deepfm import DeepFM
 
         model = DeepFM([Field(name='c1', vocabulary_size=100),
                         Field(name='c2', vocabulary_size=100),
@@ -200,7 +200,7 @@ class TestDeepFM(BaseTestCase):
 class TestNFM(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK import nfm
+        from recommendation.rank import nfm
 
         model = nfm.NFM([nfm.Field(name='c1', vocabulary_size=100, dim=10),
                          nfm.Field(name='c2', vocabulary_size=100, dim=10),
@@ -219,7 +219,7 @@ class TestNFM(BaseTestCase):
 class TestxDeepFM(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.xdeepfm import xDeepFM
+        from recommendation.rank.xdeepfm import xDeepFM
 
         model = xDeepFM([Field(name='c1', vocabulary_size=100, dim=10),
                          Field(name='c2', vocabulary_size=100, dim=10),
@@ -240,7 +240,7 @@ class TestxDeepFM(BaseTestCase):
 class TestContextNet(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.contextnet import ContextNet
+        from recommendation.rank.contextnet import ContextNet
 
         model = ContextNet(num_block=3,
                            agg_dim=1024,
@@ -254,7 +254,7 @@ class TestContextNet(BaseTestCase):
 class TestMaskNet(BaseTestCase):
 
     def test(self):
-        from Recommendation.RANK.masknet import MaskNet
+        from recommendation.rank.masknet import MaskNet
 
         model = MaskNet(agg_dim=1024,
                         num_mask_block=3,

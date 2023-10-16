@@ -6,7 +6,7 @@
 from typing import List, Union
 import tensorflow as tf
 
-from ..Utils.core import dnn_layer
+from ..utils.core import dnn_layer
 
 
 class DeepCrossing:

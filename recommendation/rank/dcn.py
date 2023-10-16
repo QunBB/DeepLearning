@@ -11,7 +11,7 @@ import tensorflow as tf
 from typing import Optional, Callable, List
 from functools import partial
 
-from ..Utils.core import dnn_layer
+from ..utils.core import dnn_layer
 
 
 class DCN:

@@ -10,8 +10,8 @@ from typing import List, Union, Callable, Optional
 from enum import IntEnum
 import tensorflow as tf
 
-from ..Utils.core import dnn_layer
-from ..Utils.type_declaration import KernelType
+from ..utils.core import dnn_layer
+from ..utils.type_declaration import KernelType
 
 
 class PNN:
