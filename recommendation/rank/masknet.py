@@ -1,3 +1,8 @@
+"""
+论文：MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask
+
+地址：https://arxiv.org/pdf/2102.0761
+"""
 import tensorflow as tf
 from typing import List, Union, Optional
 from functools import partial

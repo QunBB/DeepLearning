@@ -1,3 +1,8 @@
+"""
+论文：ContextNet: A Click-Through Rate Prediction Framework Using Contextual information to Refine Feature Embedding
+
+地址：https://arxiv.org/pdf/2107.1202
+"""
 import tensorflow as tf
 from typing import List, Union
 from functools import partial

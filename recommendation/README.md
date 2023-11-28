@@ -1,0 +1,28 @@
+# 推荐系统
+
+项目文件夹：[recommendation](https://github.com/QunBB/DeepLearning/tree/main/recommendation)
+
+- **ctr训练提速(超大batch size)-CowClip**：[专栏](https://zhuanlan.zhihu.com/p/557451365)
+
+## 1. Match(召回)
+
+项目文件夹：[recommendation/match](https://github.com/QunBB/DeepLearning/tree/main/recommendation/match)
+
+- **多兴趣召回MIND**: [专栏](https://zhuanlan.zhihu.com/p/463064543)
+- **多兴趣召回ComiRec**: [专栏](https://zhuanlan.zhihu.com/p/568781562)
+
+
+
+- **深入浅出地理解Youtube DNN推荐模型**: [专栏](https://zhuanlan.zhihu.com/p/405907646)
+- **引入对偶增强向量的双塔召回模型**: [专栏](https://zhuanlan.zhihu.com/p/608636233)
+
+## 2. Rank(排序)
+
+项目文件夹：[recommendation/rank](https://github.com/QunBB/DeepLearning/tree/main/recommendation/rank)
+
+- **ctr特征重要性建模：FiBiNet&FiBiNet++模型**：[专栏](https://zhuanlan.zhihu.com/p/603262632)
+- **ctr预估之FMs系列:FM/FFM/FwFM/FEFM**：[专栏](https://zhuanlan.zhihu.com/p/613030015)
+- **ctr预估之DNN系列模型:FNN/PNN/DeepCrossing**：[专栏](https://zhuanlan.zhihu.com/p/623567076)
+- **ctr预估之Wide&Deep系列模型:DeepFM/DCN**：[专栏](https://zhuanlan.zhihu.com/p/631668163)
+- **ctr预估之Wide&Deep系列(下):NFM/xDeepFM**：[专栏](https://zhuanlan.zhihu.com/p/634584585)
+- **CTR特征建模：ContextNet & MaskNet(Twitter在用的排序模型)**：[专栏](https://zhuanlan.zhihu.com/p/660375034)
