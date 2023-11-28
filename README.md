@@ -93,3 +93,9 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 - **AI绘画Stable Diffusion原理之VQGANs/隐空间/Autoencoder**：[专栏](https://zhuanlan.zhihu.com/p/645939505)
 - **AI绘画Stable Diffusion原理之扩散模型DDPM**：[专栏](https://zhuanlan.zhihu.com/p/645939505)
+
+# 8. Embedding
+
+项目文件夹：[embedding](https://github.com/QunBB/DeepLearning/tree/main/embedding)
+
+- **Embedding压缩之hash embedding**：[专栏](https://zhuanlan.zhihu.com/p/669320977)
