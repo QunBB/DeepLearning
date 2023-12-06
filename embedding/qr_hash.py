@@ -1,3 +1,8 @@
+"""
+论文：Compositional Embeddings Using Complementary Partitions for Memory-Efficient Recommendation Systems
+
+地址：https://arxiv.org/abs/1909.02107
+"""
 from typing import Optional, Union
 import tensorflow as tf
 
