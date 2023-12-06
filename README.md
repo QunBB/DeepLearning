@@ -69,7 +69,7 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 ## 5.2 bert系列
 
-**BERT预训练代码(tensorflow和torch版本)：[NLP/masked_language_model](https://github.com/QunBB/DeepLearning/tree/main/nlp/masked_language_model)**（[独立git仓库](https://github.com/QunBB/bert-pretraining)）
+**BERT预训练代码(tensorflow和torch版本)：[NLP/masked_language_model](https://github.com/QunBB/DeepLearning/tree/main/nlp/masked_language_model)**（[独立实现git仓库](https://github.com/QunBB/bert-pretraining)）
 
 - **BERT模型系列大全解读**：[专栏](https://zhuanlan.zhihu.com/p/598095233)
 
@@ -99,3 +99,4 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 项目文件夹：[embedding](https://github.com/QunBB/DeepLearning/tree/main/embedding)
 
 - **Embedding压缩之hash embedding**：[专栏](https://zhuanlan.zhihu.com/p/669320977)
+- **Embedding压缩之基于二进制码的Hash Embedding**：[专栏](https://zhuanlan.zhihu.com/p/670802301)
