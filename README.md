@@ -1,6 +1,6 @@
 # 1. tensorflow使用
 
-项目文件夹：[TensorFlow](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow)
+项目文件夹：[_tensorflow](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow)
 
 - **batch_normalization**: [专栏](https://zhuanlan.zhihu.com/p/360842139)
 - **dataset.shuffle、batch、repeat:** [专栏](https://zhuanlan.zhihu.com/p/360843167)
@@ -10,15 +10,15 @@
 
 ## 1.1 部署
 
-项目文件夹：[serving](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/serving)
+项目文件夹：[_tensorflow/serving](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/serving)
 
 - **tensorflow serving：** [专栏](https://zhuanlan.zhihu.com/p/407986666)
 
 ## 1.2 自定义算子
 
-项目文件夹：[tensorflow_custom_op](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/tensorflow_custom_op)
+项目文件夹：[_tensorflow/tensorflow-custom-op](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/tensorflow-custom-op)
 
-- **tensorflow自定义算子：** [专栏](https://zhuanlan.zhihu.com/p/672088843)
+- **如何实现TensorFlow自定义算子？：** [专栏](https://zhuanlan.zhihu.com/p/672088843)
 
 # 2. 多任务学习MTL
 
