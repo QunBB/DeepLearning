@@ -1,4 +1,20 @@
-# tensorflow-custom-op
+- [目录结构](#目录结构)
+- [前置依赖](#前置依赖)
+  - [tensorflow](#tensorflow)
+- [Step1. 定义运算接口](#step1-定义运算接口)
+- [Step2. 实现运算内核](#step2-实现运算内核)
+  - [Step2.1 定义计算头文件](#step21-定义计算头文件)
+  - [Step2.2 cpu运算内核](#step22-cpu运算内核)
+    - [2.2.1 计算仿函数实现](#221-计算仿函数实现)
+    - [2.2.2 内核实现类](#222-内核实现类)
+    - [2.2.3 内核注册](#223-内核注册)
+  - [Step2.3 cuda运算内核](#step23-cuda运算内核)
+    - [2.3.1 CUDA计算内核](#231-cuda计算内核)
+    - [2.3.2 CUDA内核仿函数](#232-cuda内核仿函数)
+- [Step3. 编译](#step3-编译)
+- [Step4. Python调用](#step4-python调用)
+- [CPU版本](#cpu版本)
+
 
 制作过程基于tensorflow官方的custom-op仓库以及官网教程，并且在Ubuntu和MacOS系统通过了测试：
 
@@ -9,7 +25,7 @@
 
 而基于[二进制码Hash编码](https://zhuanlan.zhihu.com/p/670802301)的算子实现，是能够满足大部分自定义需求的，并且**经过测试是支持tensorflow1.x和2.x的**。
 
-## 目录结构
+# 目录结构
 
 整个项目的目录结构如下，下面会对每一个文件进行讲述其作用：
 
@@ -34,13 +50,13 @@
             └── binary_code_hash_test.py
 ```
 
-## 前置依赖
+# 前置依赖
 
 - make
 - g++
 - cuda
 
-### tensorflow
+## tensorflow
 
 **无需源码安装，pip安装的情况下已通过测试。**
 
@@ -60,7 +76,7 @@
 
 3. 当然，你仍然可以选择源码编译安装: https://www.tensorflow.org/install/source
 
-## Step1. 定义运算接口
+# Step1. 定义运算接口
 
 对应文件：**[tensorflow_binary_code_hash/cc/ops/binary_code_hash_ops.cc](tensorflow_binary_code_hash/cc/ops/binary_code_hash_ops.cc)**。
 
@@ -118,9 +134,9 @@ output_shape.push_back(c->MakeDim(block_num));
 c->set_output(0, c->MakeShape(output_shape));
 ```
 
-## Step2. 实现运算内核
+# Step2. 实现运算内核
 
-### Step2.1 定义计算头文件
+## Step2.1 定义计算头文件
 
 对应文件：**[tensorflow_binary_code_hash/cc/kernels/binary_code_hash.h](tensorflow_binary_code_hash/cc/kernels/binary_code_hash.h)**。
 
@@ -142,7 +158,7 @@ struct BinaryCodeHashFunctor {
 }  // namespace tensorflow
 ```
 
-### Step2.2 cpu运算内核
+## Step2.2 cpu运算内核
 
 对应文件：**[tensorflow_binary_code_hash/cc/kernels/binary_code_hash_kernels.cc](tensorflow_binary_code_hash/cc/kernels/binary_code_hash_kernels.cc)**。这里主要包括三部分：
 
@@ -150,7 +166,7 @@ struct BinaryCodeHashFunctor {
 2. 运算内核的实现类
 3. 内核注册
 
-#### 2.2.1 计算仿函数实现
+### 2.2.1 计算仿函数实现
 
 在这里实现BinaryCodeHashFunctor具体的计算逻辑，输入张量的数据通过指针变量in来访问，然后将计算结果写入到输出张量对应的指针变量out。
 
@@ -166,7 +182,7 @@ struct BinaryCodeHashFunctor<CPUDevice, T> {
 };
 ```
 
-#### 2.2.2 内核实现类
+### 2.2.2 内核实现类
 
 在这里，运算内核实现类需要继承OpKernel，如下面的代码
 
@@ -239,7 +255,7 @@ BinaryCodeHashFunctor<Device, T>()(
         length_, t_, strategy_ == "succession");
 ```
 
-#### 2.2.3 内核注册
+### 2.2.3 内核注册
 
 **CPU和CPU内核都需要在这个c++文件中进行注册。** 
 
@@ -264,7 +280,7 @@ REGISTER_GPU(int32);
 REGISTER_GPU(int64);
 ```
 
-### Step2.3 cuda运算内核
+## Step2.3 cuda运算内核
 
 对应文件：**[tensorflow_binary_code_hash/cc/kernels/binary_code_hash_kernels.cu.cc](tensorflow_binary_code_hash/cc/kernels/binary_code_hash_kernels.cu.cc)**。
 
@@ -273,7 +289,7 @@ REGISTER_GPU(int64);
 1. CUDA计算内核
 2. BinaryCodeHashFunctor仿函数的具体实现
 
-#### 2.3.1 CUDA计算内核
+### 2.3.1 CUDA计算内核
 
 这是属于CUDA的核函数，带有声明符号`__global__`。与前面CPU内核中的计算仿函数类似，输入张量的数据通过指针变量in来访问，然后将计算结果写入到输出张量对应的指针变量out。但不同的是输入张量的访问涉及到CUDA中的grid、block和线程的关系，下面的代码则是简单地实现了所有数据的遍历。
 
@@ -289,7 +305,7 @@ __global__ void BinaryCodeHashCudaKernel(const int size, const T* in, T* out, in
 }
 ```
 
-#### 2.3.2 CUDA内核仿函数
+### 2.3.2 CUDA内核仿函数
 
 在这里定义了CUDA计算内核的启动，其实跟上述的CPU内核实现类，即 **[tensorflow_binary_code_hash/cc/kernels/binary_code_hash_kernels.cc](tensorflow_binary_code_hash/cc/kernels/binary_code_hash_kernels.cc)** 中的Compute重载函数。只是不同的是这里不需要获取输入和参数，因为CUDA是直接由CPU内存拷贝过去。
 
@@ -311,7 +327,7 @@ struct BinaryCodeHashFunctor<GPUDevice, T> {
 };
 ```
 
-## Step3. 编译
+# Step3. 编译
 
 对应文件：**[Makefile](https://github.com/QunBB/tensorflow-custom-op/blob/main/Makefile)**。
 
@@ -323,7 +339,7 @@ make clean
 make binary_code_hash_op
 ```
 
-## Step4. Python调用
+# Step4. Python调用
 
 对应文件：**[tensorflow_binary_code_hash/python/ops/binary_code_hash_ops.py](tensorflow_binary_code_hash/python/ops/binary_code_hash_ops.py)、[tensorflow_binary_code_hash/python/ops/binary_code_hash_test.py](tensorflow_binary_code_hash/python/ops/binary_code_hash_test.py)**。
 
@@ -342,7 +358,7 @@ binary_code_hash = binary_code_hash_ops.binary_code_hash
 
 可以直接使用make执行测试脚本：`make binary_code_hash_test`。也可以选择进入目录，手动执行Python脚本。
 
-## CPU版本
+# CPU版本
 
 对于没有GPU资源的小伙伴，也提供了纯CPU版本的算子实现。
 
