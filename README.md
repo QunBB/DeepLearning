@@ -10,7 +10,15 @@
 
 ## 1.1 部署
 
-**tensoeflow serving：** [专栏](https://zhuanlan.zhihu.com/p/407986666)
+项目文件夹：[serving](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/serving)
+
+- **tensorflow serving：** [专栏](https://zhuanlan.zhihu.com/p/407986666)
+
+## 1.2 自定义算子
+
+项目文件夹：[tensorflow_custom_op](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/tensorflow_custom_op)
+
+- **tensorflow自定义算子：** [专栏](https://zhuanlan.zhihu.com/p/672088843)
 
 # 2. 多任务学习MTL
 
