@@ -4,7 +4,7 @@ Binary Code Based Hash Embedding原理详见: [专栏](https://zhuanlan.zhihu.co
 
 1. 二进制码Hash编码的算子实现（基于tensorflow官方custom-op仓库制作:  [git](https://github.com/tensorflow/custom-op) | [tutorial](https://www.tensorflow.org/guide/create_op)）
 
-2. 基于二进制码的Hash Embedding的具体[Python实现](https://github.com/QunBB/DeepLearning/blob/main/embedding/binary_code_hash_embedding/binary_code_hash_embedding.py)
+2. 基于二进制码的Hash Embedding的具体Python实现: [binary_code_hash_embedding.py](https://github.com/QunBB/DeepLearning/blob/main/embedding/binary_code_hash_embedding/binary_code_hash_embedding.py)
 
 ## 自定义算子
 
