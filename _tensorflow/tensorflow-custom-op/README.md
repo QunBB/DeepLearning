@@ -14,6 +14,7 @@
 - [Step3. 编译](#step3-编译)
 - [Step4. Python调用](#step4-python调用)
 - [CPU版本](#cpu版本)
+- [Issues](#issues)
 
 
 制作过程基于tensorflow官方的custom-op仓库以及官网教程，并且在Ubuntu和MacOS系统通过了测试：
@@ -367,3 +368,55 @@ binary_code_hash = binary_code_hash_ops.binary_code_hash
 - 其编译命令也包含在Makefile文件中，对应执行：**`make binary_code_hash_cpu_only`**
 - 最终生成的so文件则是：**`tensorflow_binary_code_hash/python/ops/_binary_code_hash_cpu_ops.so`**
 
+# Issues
+
+1. In file included from tensorflow_time_two/cc/kernels/time_two_kernels.cu.cc:21:0: /usr/local/lib/python3.6/dist-packages/tensorflow/include/tensorflow/core/util/gpu_kernel_helper.h:22:10: fatal error: third_party/gpus/cuda/include/cuda_fp16.h: No such file or directory
+
+如果是conda环境，tensorflow c++源码的头文件位置则在 `<your_anaconda_path>/envs/<your_env_name>/lib/pythonx.x/site-packages/tensorflow/include`
+对于tensorflow 1.x，则不是存放在tensorflow，而是在tensorflow_core
+
+解决方案一：
+
+**Copy the CUDA header files to target directory. 拷贝CUDA头文件**
+
+```shell
+mkdir -p /usr/local/lib/python3.6/dist-packages/tensorflow/include/third_party/gpus/cuda/include && cp -r /usr/local/cuda/targets/x86_64-linux/include/* /usr/local/lib/python3.6/dist-packages/tensorflow/include/third_party/gpus/cuda/include
+```
+
+解决方案二：
+
+**修改CUDA头文件.**
+
+"tensorflow/include/tensorflow/core/util/gpu_kernel_helper.h"
+
+```c++
+#include "third_party/gpus/cuda/include/cuda_fp16.h"
+```
+
+替换成
+
+```c++
+#include "cuda_fp16.h"
+```
+
+"tensorflow/include/tensorflow/core/util/gpu_device_functions.h"
+
+```c++
+#include "third_party/gpus/cuda/include/cuComplex.h"
+#include "third_party/gpus/cuda/include/cuda.h"
+```
+
+替换成
+
+```c++
+#include "cuComplex.h"
+#include "cuda.h"
+```
+
+2. tensorflow 2.x支持
+
+对于新版本的tensorflow, **[Makefile](https://github.com/QunBB/DeepLearning/blob/main/embedding/binary_code_hash_embedding/Makefile#L14)中需要指定c++新标准**。 比如tensorflow2.10则需指定-std=c++17
+
+3. tensorflow.python.framework.errors_impl.NotFoundError: dlopen(./tensorflow_binary_code_hash/python/ops/\_binary_code_hash_cpu_ops.so, 0x0006): Library not loaded: @rpath/libtensorflow_framework.2.dylib
+
+运行Python脚本导入算子so文件时的错误。这种错误一般是**Python运行环境与编译时的Python环境不一致导致的**。
