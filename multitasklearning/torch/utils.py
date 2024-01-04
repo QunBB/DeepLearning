@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+from typing import List, Optional, Union, Tuple
+
 
 class DNN(nn.Module):
     """The Multi Layer Perceptron
@@ -18,30 +20,30 @@ class DNN(nn.Module):
 
         - **activation**: Activation function to use.
 
-        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
-
         - **dropout_rate**: float in [0,1). Fraction of the units to dropout.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
-        - **seed**: A Python integer to use as random seed.
     """
 
-    def __init__(self, inputs_dim, hidden_units, activation='relu',
-                 l2_reg=0., dropout_rate=0., use_bn=False,
-                 init_std=0.0001, dice_dim=3, seed=1024):
+    def __init__(self,
+                 inputs_dim: int,
+                 hidden_units: Union[List[int], Tuple[int]],
+                 activation: Optional[str] = 'relu',
+                 dropout_rate: float = 0.,
+                 use_bn: bool = False,
+                 bias: bool = True,
+                 dice_dim: int = 3):
         super(DNN, self).__init__()
         self.dropout_rate = dropout_rate
         self.dropout = nn.Dropout(dropout_rate)
-        self.seed = seed
-        self.l2_reg = l2_reg
         self.use_bn = use_bn
         if len(hidden_units) == 0:
             raise ValueError("hidden_units is empty!!")
         hidden_units = [inputs_dim] + list(hidden_units)
 
         self.linears = nn.ModuleList(
-            [nn.Linear(hidden_units[i], hidden_units[i + 1]) for i in range(len(hidden_units) - 1)])
+            [nn.Linear(hidden_units[i], hidden_units[i + 1], bias=bias) for i in range(len(hidden_units) - 1)])
 
         if self.use_bn:
             self.bn = nn.ModuleList(
@@ -52,7 +54,7 @@ class DNN(nn.Module):
 
         for name, tensor in self.linears.named_parameters():
             if 'weight' in name:
-                nn.init.normal_(tensor, mean=0, std=init_std)
+                nn.init.kaiming_normal_(tensor)
 
     def forward(self, inputs):
         deep_input = inputs

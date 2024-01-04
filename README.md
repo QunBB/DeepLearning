@@ -16,7 +16,7 @@
 
 ## 1.2 自定义算子
 
-项目文件夹：[_tensorflow/tensorflow-custom-op](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/tensorflow-custom-op)
+项目文件夹：[_tensorflow/tensorflow-custom-op](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow/tensorflow-custom-op)（[独立实现git仓库](https://github.com/QunBB/tensorflow-custom-op)）
 
 - **如何实现TensorFlow自定义算子？：** [专栏](https://zhuanlan.zhihu.com/p/672088843)
 

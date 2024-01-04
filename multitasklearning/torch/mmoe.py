@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from collections import OrderedDict
-from typing import List, Dict
+from typing import List, Dict, Tuple, Union, Optional
 
 from utils import DNN
 
@@ -16,7 +16,6 @@ class MMoe(nn.Module):
     :param expert_hidden_units: list of positive integer, the layer number and units in each expert layer.
     :param tower_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param tower_hidden_units: list of positive integer, the layer number and units in each tower layer.
-    :param init_std: float,to use as the initializer std of embedding vector
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether to use BatchNormalization before activation or not in DNN
@@ -28,28 +27,42 @@ class MMoe(nn.Module):
                  inputs_dim: int,
                  labels_dict: Dict[str, int],
                  num_experts: int,
-                 expert_hidden_units: List[int],
-                 tower_hidden_units=(256, 128),
-                 l2_reg_dnn=0., init_std=0.0001,
-                 dnn_dropout=0., dnn_activation='relu', dnn_use_bn=False):
+                 expert_hidden_units: Union[List[int], Tuple[int]],
+                 tower_hidden_units: Union[List[int], Tuple[int]] = (256, 128),
+                 l2_reg_dnn: float = 0.,
+                 dnn_dropout: float = 0.,
+                 dnn_activation: Optional[str] = 'relu',
+                 dnn_use_bn: bool = False,
+                 device: str = 'cpu'):
         super(MMoe, self).__init__()
 
         self.labels_dict = labels_dict
 
         self.experts_dnn = nn.ModuleList([DNN(inputs_dim, expert_hidden_units,
-                                              activation=dnn_activation, l2_reg=l2_reg_dnn,
-                                              dropout_rate=dnn_dropout, use_bn=dnn_use_bn, init_std=init_std,
+                                              activation=dnn_activation, dropout_rate=dnn_dropout, use_bn=dnn_use_bn,
                                               ) for _ in range(num_experts)])
-        self.gate_dnn = nn.ModuleList([DNN(inputs_dim, [num_experts],
-                                           activation=None, l2_reg=l2_reg_dnn,
-                                           use_bn=dnn_use_bn, init_std=init_std,
-                                           ) for _ in range(num_experts)])
+        self.gate_dnn = nn.ModuleList([DNN(inputs_dim, [num_experts], activation=None, use_bn=dnn_use_bn,
+                                           ) for _ in labels_dict])
 
         self.task_tower = nn.ModuleList([DNN(expert_hidden_units[-1], tower_hidden_units, activation=dnn_activation,
-                                             l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout, use_bn=dnn_use_bn,
-                                             init_std=init_std) for _ in labels_dict])
+                                             dropout_rate=dnn_dropout, use_bn=dnn_use_bn,
+                                             ) for _ in labels_dict])
         self.task_dense = nn.ModuleList(
-            [nn.Linear(tower_hidden_units[-1], labels_dict[name], bias=False) for name in labels_dict])
+            [DNN(tower_hidden_units[-1], [labels_dict[name]], activation=None, bias=False) for name in labels_dict])
+
+        self.l2_reg_dnn = l2_reg_dnn
+        self.device = device
+        self.to(device)
+
+    @property
+    def l2_reg_loss(self):
+        """L2 Regularization Loss"""
+        reg_loss = torch.zeros((1,), device=self.device)
+        if self.l2_reg_dnn and self.l2_reg_dnn > 0.:
+            for name, parameter in self.named_parameters():
+                if 'weight' in name:
+                    reg_loss += torch.sum(self.l2_reg_dnn * torch.square(parameter))
+        return reg_loss
 
     def forward(self, dnn_inputs: torch.Tensor) -> Dict[str, torch.Tensor]:
         outputs = OrderedDict()
@@ -81,12 +94,12 @@ def _merge_experts_with_gate(experts: List[torch.Tensor],
 if __name__ == '__main__':
     import numpy as np
 
-    model = MMoe(inputs_dim=2056,
+    model = MMoe(inputs_dim=8,
                  labels_dict={"click": 2, "like": 2},
                  num_experts=2,
                  expert_hidden_units=[256])
 
-    outputs = model(torch.FloatTensor(np.random.random([64, 2056])))
+    outputs = model(torch.FloatTensor(np.random.random([4, 8])))
 
     print(outputs)
     for name in outputs:
