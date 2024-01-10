@@ -189,13 +189,11 @@ class SENet:
                               activation=tf.nn.relu,
                               name='W_2')
 
-        # Re-weight
-        senet_like_embeddings = [emb * w for emb, w in zip(embeddings_list, tf.split(A_2, feature_size_list, axis=1))]
+        # Re-weight & Fuse
+        senet_plus_embeddings = [emb * w + emb for emb, w in zip(embeddings_list, tf.split(A_2, feature_size_list, axis=1))]
 
-        # Fuse
-        output = tf.concat(senet_like_embeddings, axis=-1) + tf.concat(embeddings_list, axis=-1)
         # Layer Normalization
-        output = tf.contrib.layers.layer_norm(
-            inputs=output, begin_norm_axis=-1, begin_params_axis=-1, scope='LN')
+        senet_plus_output = [tf.contrib.layers.layer_norm(
+            inputs=x, begin_norm_axis=-1, begin_params_axis=-1, scope=f'LN-{i}') for i, x in enumerate(senet_plus_embeddings)]
 
-        return output
+        return tf.concat(senet_plus_output, axis=-1)
