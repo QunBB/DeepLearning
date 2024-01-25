@@ -47,9 +47,9 @@ class DeepCrossing:
 
         return tf.reshape(output, [-1])
 
-    def residual_layer(self, inputs, hidden_size, is_training):
+    def residual_layer(self, inputs, hidden_units, is_training):
         dim = inputs.shape.as_list()[-1]
-        layer_output = dnn_layer(inputs, hidden_size=[hidden_size, dim],
+        layer_output = dnn_layer(inputs, hidden_units=[hidden_units, dim],
                                  dropout=self.dropout,
                                  activation=tf.nn.relu,
                                  use_bn=self.use_bn,

@@ -22,7 +22,7 @@ class PNN:
     def __init__(self,
                  num_fields: int,
                  dim: int,
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  add_inner_product: bool,
                  add_outer_product: bool,
                  kernel_type: Optional[KernelType] = None,
@@ -37,7 +37,7 @@ class PNN:
 
         :param num_fields:
         :param dim: 特征embeddings的维度大小dim
-        :param dnn_hidden_size: DNN的隐藏层size
+        :param dnn_hidden_units: DNN的隐藏层size
         :param add_inner_product:
         :param add_outer_product:
         :param kernel_type:
@@ -52,7 +52,7 @@ class PNN:
         self.add_inner_product = add_inner_product
         self.add_outer_product = add_outer_product
         self.product_layer_dim = product_layer_size
-        self.dnn_hidden_size = dnn_hidden_size
+        self.dnn_hidden_units = dnn_hidden_units
         self.dnn_l2_reg = dnn_l2_reg
         self.dropout = dropout
         self.use_bn = use_bn
@@ -129,7 +129,7 @@ class PNN:
 
         dnn_inputs = tf.concat(dnn_inputs, axis=-1)
 
-        dnn_output = dnn_layer(dnn_inputs, self.dnn_hidden_size, activation=tf.nn.relu,
+        dnn_output = dnn_layer(dnn_inputs, self.dnn_hidden_units, activation=tf.nn.relu,
                                dropout=self.dropout, is_training=is_training, use_bn=self.use_bn, l2_reg=self.dnn_l2_reg)
 
         output = tf.layers.dense(dnn_output, 1, activation=tf.nn.sigmoid,

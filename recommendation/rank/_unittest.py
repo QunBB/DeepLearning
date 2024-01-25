@@ -19,6 +19,25 @@ def get_tensor_inputs():
     return sparse_inputs_dict, dense_inputs_dict
 
 
+def get_din_inputs():
+    fields = [DINField(name='goods_id', embedding_dim=64, vocabulary_size=10000,
+                       mini_batch_regularization=True, ids_occurrence=np.random.randint(1, 100, [10000])),
+              DINField(name='shop_id', embedding_dim=64, vocabulary_size=100, l2_reg=0.00001),
+              DINField(name='user_id', embedding_dim=64, vocabulary_size=2000,
+                       mini_batch_regularization=True, ids_occurrence=np.random.randint(1, 100, [2000])),
+              DINField(name='context', embedding_dim=64, vocabulary_size=200, l2_reg=0.00001)
+              ]
+    inputs = dict(user_behaviors_ids={'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [32, 20])),
+                                      'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [32, 20]))},
+                  sequence_length=tf.convert_to_tensor(np.random.randint(1, 20, [32])),
+                  target_ids={'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [32])),
+                              'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [32]))},
+                  other_feature_ids={'user_id': tf.convert_to_tensor(np.random.randint(0, 2000, [32])),
+                                     'context': tf.convert_to_tensor(np.random.randint(0, 200, [32]))})
+
+    return fields, inputs
+
+
 class BaseTestCase(unittest.TestCase):
     output = None
 
@@ -97,7 +116,7 @@ class TestFNN(BaseTestCase):
                          Field(name='c2', vocabulary_size=100),
                          Field(name='d1')],
                         embedding_dim=4,
-                        dnn_hidden_size=[256, 128],
+                        dnn_hidden_units=[256, 128],
                         fms_checkpoint='fms.ckpt'
                         )
         output = model(sparse_inputs_dict, dense_inputs_dict)
@@ -139,7 +158,7 @@ class TestPNN(BaseTestCase):
                         add_inner_product=True,
                         add_outer_product=True,
                         product_layer_size=128,
-                        dnn_hidden_size=[256, 128],
+                        dnn_hidden_units=[256, 128],
                         )
 
         output = model([tf.convert_to_tensor(np.random.random([32, 64]).astype(np.float32)) for _ in range(20)])
@@ -170,7 +189,7 @@ class TestDCN(BaseTestCase):
                     cross_layer_num=3,
                     cross_network_type='matrix',
                     low_rank_dim=64,
-                    dnn_hidden_size=[512, 128],
+                    dnn_hidden_units=[512, 128],
                     )
 
         output = model(tf.convert_to_tensor(np.random.random([32, 512]).astype(np.float32)))
@@ -186,7 +205,7 @@ class TestDeepFM(BaseTestCase):
         model = DeepFM([Field(name='c1', vocabulary_size=100),
                         Field(name='c2', vocabulary_size=100),
                         Field(name='d1')],
-                       dnn_hidden_size=[256, 256],
+                       dnn_hidden_units=[256, 256],
                        linear_type=LinearTerms.LW,
                        model_type=FMType.FM)
 
@@ -206,7 +225,7 @@ class TestNFM(BaseTestCase):
                          nfm.Field(name='c2', vocabulary_size=100, dim=10),
                          nfm.Field(name='d1', dim=10)],
                         linear_type=nfm.LinearTerms.FiLV,
-                        dnn_hidden_size=[512, 128],
+                        dnn_hidden_units=[512, 128],
                         dnn_activation=tf.nn.relu)
 
         sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
@@ -225,7 +244,7 @@ class TestxDeepFM(BaseTestCase):
                          Field(name='c2', vocabulary_size=100, dim=10),
                          Field(name='d1', dim=10)],
                         cross_layer_sizes=[10, 20],
-                        dnn_hidden_size=[128, 64],
+                        dnn_hidden_units=[128, 64],
                         dnn_activation=tf.nn.relu,
                         split_connect=True,
                         )
@@ -268,6 +287,21 @@ class TestMaskNet(BaseTestCase):
         #                 hidden_layer_size=[256, 128])
 
         output = model(tf.convert_to_tensor(np.random.random([32, 10, 64]).astype(np.float32)))
+
+        super().set_output(output)
+
+
+class TestDIN(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.din import DIN
+
+        fields, inputs = get_din_inputs()
+
+        model = DIN(fields=fields,
+                    mlp_hidden_units=[256, 128])
+
+        output = model(**inputs)
 
         super().set_output(output)
 

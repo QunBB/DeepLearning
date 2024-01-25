@@ -17,7 +17,7 @@ from ..utils.core import dnn_layer
 class DCN:
     def __init__(self,
                  input_dim: int,
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  cross_layer_num: int,
                  cross_network_type: str,
                  low_rank_dim: Optional[int] = None,
@@ -31,7 +31,7 @@ class DCN:
         self.cross_layer = CrossNetwork(input_dim, cross_layer_num, cross_network_type, low_rank_dim,
                                         cross_network_activation, cross_network_l2_reg)
 
-        self.dnn_layer = partial(dnn_layer, hidden_size=dnn_hidden_size, activation=dnn_activation,
+        self.dnn_layer = partial(dnn_layer, hidden_units=dnn_hidden_units, activation=dnn_activation,
                                  dropout=dnn_dropout, use_bn=dnn_use_bn, l2_reg=dnn_l2_reg)
         self.dnn_l2_reg = dnn_l2_reg
 

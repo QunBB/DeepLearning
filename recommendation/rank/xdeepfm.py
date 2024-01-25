@@ -17,7 +17,7 @@ class xDeepFM:
     def __init__(self,
                  fields_list: List[Field],
                  cross_layer_sizes: List[int],
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  linear_type: LinearTerms = LinearTerms.LW,
                  low_rank_dim: Optional[int] = None,
                  split_connect: bool = False,
@@ -36,7 +36,7 @@ class xDeepFM:
         self.cross_layer = CIN(self.field_embedding_nums, cross_layer_sizes, low_rank_dim, split_connect, cross_activation,
                                residual, dnn_activation, dropout, l2_reg)
 
-        self.dnn_layer = partial(dnn_layer, hidden_size=dnn_hidden_size, activation=dnn_activation,
+        self.dnn_layer = partial(dnn_layer, hidden_units=dnn_hidden_units, activation=dnn_activation,
                                  dropout=dropout, use_bn=dnn_use_bn, l2_reg=l2_reg)
         self.l2_reg = l2_reg
 

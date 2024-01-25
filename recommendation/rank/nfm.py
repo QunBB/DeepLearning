@@ -17,7 +17,7 @@ from ..utils.type_declaration import LinearTerms, Field
 class NFM:
     def __init__(self,
                  fields_list: List[Field],
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  dnn_activation: Callable = None,
                  dnn_dropout: float = 0.,
                  dnn_use_bn: bool = True,
@@ -25,7 +25,7 @@ class NFM:
                  linear_type: LinearTerms = LinearTerms.LW):
         self.num_fields = len(fields_list)
 
-        self.dnn_layer = partial(dnn_layer, hidden_size=dnn_hidden_size, activation=dnn_activation,
+        self.dnn_layer = partial(dnn_layer, hidden_units=dnn_hidden_units, activation=dnn_activation,
                                  dropout=dnn_dropout, use_bn=dnn_use_bn, l2_reg=dnn_l2_reg)
         self.dnn_l2_reg = dnn_l2_reg
 

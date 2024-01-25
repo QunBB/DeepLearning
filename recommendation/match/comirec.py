@@ -16,7 +16,7 @@ class ModelType(IntEnum):
 
 
 class Model(object):
-    def __init__(self, n_mid, embedding_dim, hidden_size, batch_size, seq_len):
+    def __init__(self, n_mid, embedding_dim, hidden_units, batch_size, seq_len):
         self.batch_size = batch_size
         self.n_mid = n_mid  # item ID的总数
         self.neg_num = 10  # 负样本的个数
@@ -179,13 +179,13 @@ class CapsuleNetwork(tf.layers.Layer):
 
 
 class MIND(Model):
-    def __init__(self, n_mid, embedding_dim, hidden_size, batch_size, num_interest, seq_len=256, hard_readout=True,
+    def __init__(self, n_mid, embedding_dim, hidden_units, batch_size, num_interest, seq_len=256, hard_readout=True,
                  relu_layer=True):
-        super(MIND, self).__init__(n_mid, embedding_dim, hidden_size, batch_size, seq_len)
+        super(MIND, self).__init__(n_mid, embedding_dim, hidden_units, batch_size, seq_len)
 
         item_his_emb = self.item_his_eb
 
-        capsule_network = CapsuleNetwork(hidden_size, seq_len, bilinear_type=ModelType.MIND, num_interest=num_interest,
+        capsule_network = CapsuleNetwork(hidden_units, seq_len, bilinear_type=ModelType.MIND, num_interest=num_interest,
                                          hard_readout=hard_readout, relu_layer=relu_layer)
         self.user_eb, self.readout = capsule_network(item_his_emb, self.item_eb, self.mask)
 
@@ -193,13 +193,13 @@ class MIND(Model):
 
 
 class ComiRecDR(Model):
-    def __init__(self, n_mid, embedding_dim, hidden_size, batch_size, num_interest, seq_len=256, hard_readout=True,
+    def __init__(self, n_mid, embedding_dim, hidden_units, batch_size, num_interest, seq_len=256, hard_readout=True,
                  relu_layer=False):
-        super(ComiRecDR, self).__init__(n_mid, embedding_dim, hidden_size, batch_size, seq_len)
+        super(ComiRecDR, self).__init__(n_mid, embedding_dim, hidden_units, batch_size, seq_len)
 
         item_his_emb = self.item_his_eb
 
-        capsule_network = CapsuleNetwork(hidden_size, seq_len,
+        capsule_network = CapsuleNetwork(hidden_units, seq_len,
                                          bilinear_type=ModelType.ComiRecDR, num_interest=num_interest,
                                          hard_readout=hard_readout, relu_layer=relu_layer)
         self.user_eb, self.readout = capsule_network(item_his_emb, self.item_eb, self.mask)
@@ -208,8 +208,8 @@ class ComiRecDR(Model):
 
 
 class ComiRecSA(Model):
-    def __init__(self, n_mid, embedding_dim, hidden_size, batch_size, num_interest, seq_len=256, add_pos=True):
-        super(ComiRecSA, self).__init__(n_mid, embedding_dim, hidden_size,
+    def __init__(self, n_mid, embedding_dim, hidden_units, batch_size, num_interest, seq_len=256, add_pos=True):
+        super(ComiRecSA, self).__init__(n_mid, embedding_dim, hidden_units,
                                         batch_size, seq_len)
 
         self.dim = embedding_dim
@@ -228,7 +228,7 @@ class ComiRecSA(Model):
         # Self-Attentive Method
         num_heads = num_interest
         with tf.variable_scope("self_attention", reuse=tf.AUTO_REUSE) as scope:
-            item_hidden = tf.layers.dense(item_list_add_pos, hidden_size * 4, activation=tf.nn.tanh)
+            item_hidden = tf.layers.dense(item_list_add_pos, hidden_units * 4, activation=tf.nn.tanh)
             item_att_w = tf.layers.dense(item_hidden, num_heads, activation=None)
             item_att_w = tf.transpose(item_att_w, [0, 2, 1])
 

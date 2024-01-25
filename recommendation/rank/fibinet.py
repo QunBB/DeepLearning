@@ -68,7 +68,7 @@ class FiBiNet:
 
         output = dnn_layer(inputs=tf.concat([senet_output, bilinear_output], axis=-1),
                            is_training=is_training,
-                           hidden_size=self.dnn_units,
+                           hidden_units=self.dnn_units,
                            activation=self.dnn_activation,
                            dropout=self.dropout,
                            use_bn=self.dnn_use_bn,

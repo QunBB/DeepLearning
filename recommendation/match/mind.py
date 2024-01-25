@@ -1,14 +1,14 @@
 import tensorflow as tf
 from typing import List, Union
 
-from Recommendation.Utils.core import dnn_layer
+from recommendation.utils.core import dnn_layer
 
 
 class MIND:
 
     def __init__(self, k_max: int,
                  p: float,
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  dnn_activation,
                  dropout: float,
                  use_bn: bool,
@@ -25,7 +25,7 @@ class MIND:
 
         :param k_max: 兴趣向量的个数K
         :param p: 调整attention分布的参数
-        :param dnn_hidden_size: 如 [256, 128]
+        :param dnn_hidden_units: 如 [256, 128]
         :param dnn_activation: 如 tf.nn.relu
         :param dropout:
         :param use_bn: 是否使用batch_normalization
@@ -41,7 +41,7 @@ class MIND:
         """
         self.k_max = k_max
         self.p = p
-        self.dnn_hidden_size = dnn_hidden_size
+        self.dnn_hidden_units = dnn_hidden_units
         self.dnn_activation = dnn_activation
         self.dropout = dropout
         self.use_bn = use_bn
@@ -61,11 +61,11 @@ class MIND:
             # 用户向量的维度必须与item的向量维度相同
             if self.mode == 'mean':
                 assert all([item_emb_dim[i] == item_emb_dim[i+1] for i in range(len(item_emb_dim)-1)])
-                assert dnn_hidden_size[-1] == item_emb_dim[0]
+                assert dnn_hidden_units[-1] == item_emb_dim[0]
                 self.all_item_embedding = sum([tf.nn.embedding_lookup(item_table, item_ids) for item_table, item_ids in
                                                zip(self.item_tables, all_item_idx)]) / len(all_item_idx)
             elif self.mode == 'concat':
-                assert dnn_hidden_size[-1] == sum(item_emb_dim)
+                assert dnn_hidden_units[-1] == sum(item_emb_dim)
                 self.all_item_embedding = tf.concat([tf.nn.embedding_lookup(item_table, item_ids) for
                                                     item_table, item_ids in zip(self.item_tables, all_item_idx)],
                                                     axis=-1)
@@ -119,7 +119,7 @@ class MIND:
 
             user_vectors = dnn_layer(dnn_inputs,
                                      is_training=training,
-                                     hidden_size=self.dnn_hidden_size,
+                                     hidden_units=self.dnn_hidden_units,
                                      activation=self.dnn_activation,
                                      dropout=self.dropout,
                                      use_bn=self.use_bn,
@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
     model = MIND(k_max=3,
                  p=10,
-                 dnn_hidden_size=[256, 128],
+                 dnn_hidden_units=[256, 128],
                  dnn_activation=tf.nn.relu,
                  dropout=0.1,
                  use_bn=True,
@@ -237,7 +237,7 @@ if __name__ == '__main__':
                  )
     # model = MIND(k_max=3,
     #              p=10,
-    #              dnn_hidden_size=[256, 128],
+    #              dnn_hidden_units=[256, 128],
     #              dnn_activation=tf.nn.relu,
     #              dropout=0.1,
     #              use_bn=True,

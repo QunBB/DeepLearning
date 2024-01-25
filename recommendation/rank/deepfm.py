@@ -16,7 +16,7 @@ from ..utils.core import dnn_layer
 class DeepFM:
     def __init__(self,
                  fields_list: List[Field],
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  dnn_activation: Optional[Callable] = None,
                  dnn_dropout: Optional[float] = 0.,
                  dnn_use_bn: Optional[bool] = True,
@@ -27,7 +27,7 @@ class DeepFM:
                  ):
         self.fm = FMs(fields_list, linear_type, model_type, emb_l2_reg)
 
-        self.dnn_layer = partial(dnn_layer, hidden_size=dnn_hidden_size, activation=dnn_activation,
+        self.dnn_layer = partial(dnn_layer, hidden_units=dnn_hidden_units, activation=dnn_activation,
                                  dropout=dnn_dropout, use_bn=dnn_use_bn, l2_reg=dnn_l2_reg)
         self.dnn_l2_reg = dnn_l2_reg
 

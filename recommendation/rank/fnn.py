@@ -23,7 +23,7 @@ class FNN:
     def __init__(self,
                  fields_list: List[Field],
                  embedding_dim: int,
-                 dnn_hidden_size: List[int],
+                 dnn_hidden_units: List[int],
                  dropout: float = 0.,
                  l2_reg: float = 0.,
                  use_bn: bool = False,
@@ -34,7 +34,7 @@ class FNN:
 
         :param fields_list:
         :param embedding_dim: 特征向量的dim
-        :param dnn_hidden_size: 隐藏层的size列表
+        :param dnn_hidden_units: 隐藏层的size列表
         :param dropout:
         :param l2_reg: 特征向量的l2正则项力度
         :param use_bn: 全连接层是否使用batch_normalization
@@ -55,7 +55,7 @@ class FNN:
             self.weights_table[field.name] = tf.get_variable('w_' + field.name, shape=[field.vocabulary_size],
                                                              regularizer=tf.contrib.layers.l2_regularizer(l2_reg))
 
-        self.dnn_hidden_size = dnn_hidden_size
+        self.dnn_hidden_units = dnn_hidden_units
         self.dropout = dropout
         self.dnn_l2_reg = dnn_l2_reg
         self.use_bn = use_bn
@@ -102,7 +102,7 @@ class FNN:
 
         dense_real_layer = tf.concat(dense_real_layer, axis=1)
 
-        output = dnn_layer(dense_real_layer, self.dnn_hidden_size, activation=tf.nn.tanh,
+        output = dnn_layer(dense_real_layer, self.dnn_hidden_units, activation=tf.nn.tanh,
                            is_training=is_training, use_bn=self.use_bn, l2_reg=self.dnn_l2_reg, dropout=self.dropout)
 
         output = tf.layers.dense(output, 1, activation=tf.nn.sigmoid,
