@@ -110,8 +110,9 @@ class DIN(BaseModelMiniBatchReg):
                  mlp_use_bn: Optional[bool] = True,
                  mlp_l2_reg: float = 0.,
                  attention_hidden_units: List[int] = [80, 40],
-                 attention_activation: Callable = dice):
-        super().__init__(fields)
+                 attention_activation: Callable = dice,
+                 mode: str = 'concat'):
+        super().__init__(fields, mode)
         self.mlp_layer = partial(dnn_layer, hidden_units=mlp_hidden_units, activation=mlp_activation, use_bn=mlp_use_bn,
                                  dropout=mlp_dropout, l2_reg=mlp_l2_reg)
         self.attention_layer = partial(attention, ffn_hidden_units=attention_hidden_units, ffn_activation=attention_activation)
