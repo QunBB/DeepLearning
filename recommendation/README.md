@@ -26,3 +26,5 @@
 - **ctr预估之Wide&Deep系列模型:DeepFM/DCN**：[专栏](https://zhuanlan.zhihu.com/p/631668163)
 - **ctr预估之Wide&Deep系列(下):NFM/xDeepFM**：[专栏](https://zhuanlan.zhihu.com/p/634584585)
 - **CTR特征建模：ContextNet & MaskNet(Twitter在用的排序模型)**：[专栏](https://zhuanlan.zhihu.com/p/660375034)
+- **CTR之行为序列建模用户兴趣：DIN**：[专栏](https://zhuanlan.zhihu.com/p/679852484)
+- **CTR之行为序列建模用户兴趣：DIEN**：[专栏](https://zhuanlan.zhihu.com/p/685855305)
