@@ -7,10 +7,9 @@ references：https://github.com/zhougr1993/DeepInterestNetwork
 """
 from typing import Optional, Dict, List, Callable, Union
 import tensorflow as tf
-from dataclasses import dataclass
 from functools import partial
 
-from ..utils.core import dnn_layer, dice
+from ..utils.core import dnn_layer, dice, prelu
 from ..utils.type_declaration import DINField
 
 
@@ -165,14 +164,24 @@ class DIN(BaseModelMiniBatchReg):
 
 
 def attention(queries, keys, keys_length,
-              ffn_hidden_units=[80, 40], ffn_activation=dice):
+              ffn_hidden_units=[80, 40], ffn_activation=dice,
+              queries_ffn=False, queries_activation=prelu,
+              return_attention_score=False):
     """
 
     :param queries: [B, H]
-    :param keys: [B, T, H]
+    :param keys: [B, T, X]
     :param keys_length: [B]
-    :return: [B, H]
+    :param queries_ffn: 是否对queries进行一次ffn
+    :param queries_activation: queries ffn的激活函数
+    :param ffn_hidden_units: 隐藏层的维度大小
+    :param ffn_activation: 隐藏层的激活函数
+    :param return_attention_score: 是否返回注意力得分
+    :return: attention_score=[B, 1, T] or attention_outputs=[B, H]
     """
+    if queries_ffn:
+        queries = tf.layers.dense(queries, keys.get_shape().as_list()[-1], name='queries_ffn')
+        queries = queries_activation(queries)
     queries_hidden_units = queries.get_shape().as_list()[-1]
     queries = tf.tile(queries, [1, tf.shape(keys)[1]])
     queries = tf.reshape(queries, [-1, tf.shape(keys)[1], queries_hidden_units])
@@ -190,12 +199,15 @@ def attention(queries, keys, keys_length,
     outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
 
     # Activation
-    outputs = tf.nn.softmax(outputs)  # [B, 1, T]
+    attention_score = tf.nn.softmax(outputs)  # [B, 1, T]
+
+    if return_attention_score:
+        return attention_score
 
     # Weighted sum
-    outputs = tf.matmul(outputs, keys)  # [B, 1, H]
+    attention_outputs = tf.matmul(attention_score, keys)  # [B, 1, H]
 
-    return tf.squeeze(outputs)
+    return tf.squeeze(attention_outputs)
 
 
 def attention_multi_items(queries, keys, keys_length,

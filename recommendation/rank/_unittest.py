@@ -19,7 +19,7 @@ def get_tensor_inputs():
     return sparse_inputs_dict, dense_inputs_dict
 
 
-def get_din_inputs():
+def get_din_inputs(negative=False):
     fields = [DINField(name='goods_id', embedding_dim=64, vocabulary_size=10000,
                        mini_batch_regularization=True, ids_occurrence=np.random.randint(1, 100, [10000])),
               DINField(name='shop_id', embedding_dim=64, vocabulary_size=100, l2_reg=0.00001),
@@ -34,6 +34,9 @@ def get_din_inputs():
                               'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [32]))},
                   other_feature_ids={'user_id': tf.convert_to_tensor(np.random.randint(0, 2000, [32])),
                                      'context': tf.convert_to_tensor(np.random.randint(0, 200, [32]))})
+    if negative:
+        inputs['negative_sequence_ids'] = {'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [32, 20])),
+                                      'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [32, 20]))}
 
     return fields, inputs
 
@@ -300,6 +303,23 @@ class TestDIN(BaseTestCase):
 
         model = DIN(fields=fields,
                     mlp_hidden_units=[256, 128])
+
+        output = model(**inputs)
+
+        super().set_output(output)
+
+
+class TestDIEN(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.dien import DIEN, AIGRU, AGRU, AUGRU
+
+        fields, inputs = get_din_inputs(negative=True)
+
+        model = DIEN(fields=fields,
+                     mlp_hidden_units=[256, 128],
+                     gru_hidden_size=256,
+                     attention_gru=AIGRU)
 
         output = model(**inputs)
 
