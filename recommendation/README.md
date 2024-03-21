@@ -28,3 +28,4 @@
 - **CTR特征建模：ContextNet & MaskNet(Twitter在用的排序模型)**：[专栏](https://zhuanlan.zhihu.com/p/660375034)
 - **CTR之行为序列建模用户兴趣：DIN**：[专栏](https://zhuanlan.zhihu.com/p/679852484)
 - **CTR之行为序列建模用户兴趣：DIEN**：[专栏](https://zhuanlan.zhihu.com/p/685855305)
+- **CTR之Session行为序列建模用户兴趣：DSIN**：[专栏](https://zhuanlan.zhihu.com/p/688338754)
