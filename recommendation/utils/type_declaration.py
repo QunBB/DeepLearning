@@ -23,6 +23,8 @@ class Field:
     dim: int = 4  # embedding维度大小
     vocabulary_size: int = 1  # dense类型为1
     l2_reg: float = 0.  # embedding的正则惩罚
+    init_mean: float = 0.  # 初始化参数
+    init_std: float = 1.0  # 初始化参数
 
 
 # PNN

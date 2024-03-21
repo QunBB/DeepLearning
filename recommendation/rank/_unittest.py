@@ -41,6 +41,39 @@ def get_din_inputs(negative=False):
     return fields, inputs
 
 
+def get_dsin_inputs():
+    emb_dim = 64
+    batch_size = 32
+    max_seq_length = 20
+    num_sessions = 10
+    params = {'item_embedding_size': emb_dim * 2,
+              'num_sessions': num_sessions,
+              'seq_length_max': max_seq_length,
+              }
+    fields = [
+        Field(name='goods_id', dim=emb_dim, vocabulary_size=10000),
+        Field(name='shop_id', dim=emb_dim, vocabulary_size=100),
+        Field(name='user_id', dim=emb_dim, vocabulary_size=2000),
+        Field(name='age', dim=emb_dim, vocabulary_size=20)
+    ]
+    inputs = dict(
+        user_session_behaviors_id=[
+            {'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [batch_size, max_seq_length])),
+             'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [batch_size, max_seq_length]))} for _ in
+            range(num_sessions)
+        ],
+        seq_length_list=[
+            tf.convert_to_tensor(np.random.randint(1, max_seq_length, [batch_size])) for _ in range(num_sessions)
+        ],
+        session_length=tf.convert_to_tensor(np.random.randint(1, num_sessions, [batch_size])),
+        item_profile_ids={'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [32])),
+                          'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [32]))},
+        user_profile_ids={'user_id': tf.convert_to_tensor(np.random.randint(0, 2000, [32])),
+                          'age': tf.convert_to_tensor(np.random.randint(0, 20, [32]))}
+    )
+    return fields, inputs, params
+
+
 class BaseTestCase(unittest.TestCase):
     output = None
 
@@ -320,6 +353,26 @@ class TestDIEN(BaseTestCase):
                      mlp_hidden_units=[256, 128],
                      gru_hidden_size=256,
                      attention_gru=AIGRU)
+
+        output = model(**inputs)
+
+        super().set_output(output)
+
+
+class TestDSIN(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.dsin import DSIN
+
+        fields, inputs, params = get_dsin_inputs()
+
+        model = DSIN(fields,
+                     att_embedding_size=128,
+                     lstm_hidden_size=128,
+                     mlp_hidden_units=[256, 128],
+                     num_attention_heads=4,
+                     intermediate_size=256,
+                     **params)
 
         output = model(**inputs)
 
