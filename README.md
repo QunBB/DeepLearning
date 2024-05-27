@@ -114,8 +114,11 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 # 9. 大语言模型（LLMs）
 
+项目文件夹：[llms](https://github.com/QunBB/DeepLearning/tree/main/llms)
+
 ## 9.1 LangChain
 
-项目文件夹：[embedding](https://github.com/QunBB/DeepLearning/tree/main/llms/langchain_tutorial)
+LangChain开发入门教程：：[llms/langchain_tutorial](https://github.com/QunBB/DeepLearning/tree/main/llms/langchain_tutorial)
 
-LangChain开发入门教程：
+- **Model I/O（prompts、llms、chat model、output parsers）**：[专栏](https://zhuanlan.zhihu.com/p/700167692)
+
