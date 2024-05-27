@@ -1,0 +1,5 @@
+langchain==0.1.20
+# 科大讯飞
+websocket-client
+# 通义千问
+dashscope

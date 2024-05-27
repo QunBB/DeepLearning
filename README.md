@@ -111,3 +111,11 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 
 - **Embedding压缩之hash embedding**：[专栏](https://zhuanlan.zhihu.com/p/669320977)
 - **Embedding压缩之基于二进制码的Hash Embedding**：[专栏](https://zhuanlan.zhihu.com/p/670802301)
+
+# 9. 大语言模型（LLMs）
+
+## 9.1 LangChain
+
+项目文件夹：[embedding](https://github.com/QunBB/DeepLearning/tree/main/llms/langchain_tutorial)
+
+LangChain开发入门教程：
