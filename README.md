@@ -121,4 +121,5 @@ Triton：TensorRT对应的模型服务化，实现模型统一管理和部署
 LangChain开发入门教程：：[llms/langchain_tutorial](https://github.com/QunBB/DeepLearning/tree/main/llms/langchain_tutorial)
 
 - **Model I/O（prompts、llms、chat model、output parsers）**：[专栏](https://zhuanlan.zhihu.com/p/700167692)
+- **RAG/Retrieval（文档加载器、文本分割器、Embedding、向量数据库、检索）**：[专栏](https://zhuanlan.zhihu.com/p/706889931)
 
