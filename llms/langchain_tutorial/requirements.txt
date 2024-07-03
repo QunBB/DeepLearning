@@ -3,3 +3,11 @@ langchain==0.1.20
 websocket-client
 # 通义千问
 dashscope
+pypdf
+aiofiles
+# SemanticChunker
+langchain_experimental
+faiss-cpu
+rank_bm25
+langchain_chroma
+lark
