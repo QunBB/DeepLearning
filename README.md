@@ -122,4 +122,4 @@ LangChain开发入门教程：：[llms/langchain_tutorial](https://github.com/Qu
 
 - **Model I/O（prompts、llms、chat model、output parsers）**：[专栏](https://zhuanlan.zhihu.com/p/700167692)
 - **RAG/Retrieval（文档加载器、文本分割器、Embedding、向量数据库、检索）**：[专栏](https://zhuanlan.zhihu.com/p/706889931)
-
+- **Tools/Agents（工具、function call、agent）**：[专栏](https://zhuanlan.zhihu.com/p/712459598)

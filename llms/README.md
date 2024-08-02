@@ -16,3 +16,7 @@ LangChain开发入门教程
 - [embeddings.ipynb](https://github.com/QunBB/DeepLearning/blob/main/llms/langchain_tutorial/embeddings.ipynb)
 - [vector_store.ipynb](https://github.com/QunBB/DeepLearning/blob/main/llms/langchain_tutorial/vector_store.ipynb)
 - [retrievers.ipynb](https://github.com/QunBB/DeepLearning/blob/main/llms/langchain_tutorial/retrievers.ipynb)
+
+## 3.3 Tools/Agents
+
+- [tools_agents.ipynb](https://github.com/QunBB/DeepLearning/blob/main/llms/langchain_tutorial/tools_agents.ipynb)
