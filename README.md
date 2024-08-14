@@ -32,6 +32,7 @@
 项目文件夹：[recommendation](https://github.com/QunBB/DeepLearning/tree/main/recommendation)
 
 - **ctr训练提速(超大batch size)-CowClip**：[专栏](https://zhuanlan.zhihu.com/p/557451365)
+- **基于二叉树的近似最近邻搜索-Annoy**: [专栏](https://zhuanlan.zhihu.com/p/714579473)
 
 ## 3.1 Match(召回)
 
@@ -39,8 +40,6 @@
 
 - **多兴趣召回MIND**: [专栏](https://zhuanlan.zhihu.com/p/463064543)
 - **多兴趣召回ComiRec**: [专栏](https://zhuanlan.zhihu.com/p/568781562)
-
-
 
 - **深入浅出地理解Youtube DNN推荐模型**: [专栏](https://zhuanlan.zhihu.com/p/405907646)
 - **引入对偶增强向量的双塔召回模型**: [专栏](https://zhuanlan.zhihu.com/p/608636233)
