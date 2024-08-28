@@ -345,7 +345,8 @@ class TestDIN(BaseTestCase):
 class TestDIEN(BaseTestCase):
 
     def test(self):
-        from recommendation.rank.dien import DIEN, AIGRU, AGRU, AUGRU
+        from recommendation.rank.dien import DIEN
+        from recommendation.utils.interaction import AIGRU, AGRU, AUGRU
 
         fields, inputs = get_din_inputs(negative=True)
 

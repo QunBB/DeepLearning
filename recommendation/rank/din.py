@@ -9,7 +9,8 @@ from typing import Optional, Dict, List, Callable, Union
 import tensorflow as tf
 from functools import partial
 
-from ..utils.core import dnn_layer, dice, prelu
+from ..utils.core import dnn_layer, dice
+from ..utils.interaction import attention
 from ..utils.type_declaration import DINField
 
 
@@ -161,92 +162,3 @@ class DIN(BaseModelMiniBatchReg):
                                      # kernel_regularizer=tf.contrib.layers.l2_regularizer(self.dnn_l2_reg),
                                      kernel_initializer=tf.glorot_normal_initializer())
         return tf.reshape(output, [-1])
-
-
-def attention(queries, keys, keys_length,
-              ffn_hidden_units=[80, 40], ffn_activation=dice,
-              queries_ffn=False, queries_activation=prelu,
-              return_attention_score=False):
-    """
-
-    :param queries: [B, H]
-    :param keys: [B, T, X]
-    :param keys_length: [B]
-    :param queries_ffn: 是否对queries进行一次ffn
-    :param queries_activation: queries ffn的激活函数
-    :param ffn_hidden_units: 隐藏层的维度大小
-    :param ffn_activation: 隐藏层的激活函数
-    :param return_attention_score: 是否返回注意力得分
-    :return: attention_score=[B, 1, T] or attention_outputs=[B, H]
-    """
-    if queries_ffn:
-        queries = tf.layers.dense(queries, keys.get_shape().as_list()[-1], name='queries_ffn')
-        queries = queries_activation(queries)
-    queries_hidden_units = queries.get_shape().as_list()[-1]
-    queries = tf.tile(queries, [1, tf.shape(keys)[1]])
-    queries = tf.reshape(queries, [-1, tf.shape(keys)[1], queries_hidden_units])
-    din_all = tf.concat([queries, keys, queries - keys, queries * keys], axis=-1)
-    hidden_layer = dnn_layer(din_all, ffn_hidden_units, ffn_activation, use_bn=False, scope='attention')
-    outputs = tf.layers.dense(hidden_layer, 1, activation=None)
-    outputs = tf.reshape(outputs, [-1, 1, tf.shape(keys)[1]])
-    # Mask
-    key_masks = tf.sequence_mask(keys_length, tf.shape(keys)[1])  # [B, T]
-    key_masks = tf.expand_dims(key_masks, 1)  # [B, 1, T]
-    paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
-    outputs = tf.where(key_masks, outputs, paddings)  # [B, 1, T]
-
-    # Scale
-    outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
-
-    # Activation
-    attention_score = tf.nn.softmax(outputs)  # [B, 1, T]
-
-    if return_attention_score:
-        return attention_score
-
-    # Weighted sum
-    attention_outputs = tf.matmul(attention_score, keys)  # [B, 1, H]
-
-    return tf.squeeze(attention_outputs)
-
-
-def attention_multi_items(queries, keys, keys_length,
-                          ffn_hidden_units=[80, 40],
-                          ffn_activation=dice):
-    """
-
-    :param queries: [B, N, H] N is the number of ads
-    :param keys: [B, T, H]
-    :param keys_length:  [B]
-    :return: [B, N, H]
-    """
-    queries_hidden_units = queries.get_shape().as_list()[-1]
-    queries_nums = queries.get_shape().as_list()[1]
-    queries = tf.tile(queries, [1, 1, tf.shape(keys)[1]])
-    queries = tf.reshape(queries, [-1, queries_nums, tf.shape(keys)[1], queries_hidden_units])  # shape : [B, N, T, H]
-    max_len = tf.shape(keys)[1]
-    keys = tf.tile(keys, [1, queries_nums, 1])
-    keys = tf.reshape(keys, [-1, queries_nums, max_len, queries_hidden_units])  # shape : [B, N, T, H]
-    din_all = tf.concat([queries, keys, queries - keys, queries * keys], axis=-1)
-    hidden_layer = dnn_layer(din_all, ffn_hidden_units, ffn_activation, use_bn=False, scope='attention')
-    outputs = tf.layers.dense(hidden_layer, 1, activation=None, name='f3_att', reuse=tf.AUTO_REUSE)
-    outputs = tf.reshape(outputs, [-1, queries_nums, 1, max_len])
-    # Mask
-    key_masks = tf.sequence_mask(keys_length, max_len)  # [B, T]
-    key_masks = tf.tile(key_masks, [1, queries_nums])
-    key_masks = tf.reshape(key_masks, [-1, queries_nums, 1, max_len])  # shape : [B, N, 1, T]
-    paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
-    outputs = tf.where(key_masks, outputs, paddings)  # [B, N, 1, T]
-
-    # Scale
-    outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
-
-    # Activation
-    outputs = tf.nn.softmax(outputs)  # [B, N, 1, T]
-    outputs = tf.reshape(outputs, [-1, 1, max_len])
-    keys = tf.reshape(keys, [-1, max_len, queries_hidden_units])
-
-    # Weighted sum
-    outputs = tf.matmul(outputs, keys)
-    outputs = tf.reshape(outputs, [-1, queries_nums, queries_hidden_units])  # [B, N, 1, H]
-    return tf.squeeze(outputs)
