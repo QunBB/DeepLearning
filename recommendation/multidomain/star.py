@@ -886,7 +886,7 @@ class STAR:
         :param sequence_length: 用户行为序列长度 [B]
         :param target_ids: 候选ID [B]
         :param other_feature_ids: 其他特征，如用户特征及上下文特征
-        :param other_feature_ids: 场景指示器ID，表示当前mini-batch为第n个场景，必须是一维形式，即[1]
+        :param domain_index: 场景指示器ID，表示当前mini-batch为第n个场景，只取第一个数据来表示当前场景ID
         :param is_training:
         :return:
         """
@@ -909,6 +909,8 @@ class STAR:
             att_outputs = self.attention_agg(user_behaviors_embeddings, target_embeddings, sequence_length)
             if isinstance(att_outputs, (list, tuple)):
                 att_outputs = att_outputs[-1]
+
+        domain_index = array_ops.reshape(domain_index, [-1])[0]
 
         with tf.variable_scope(name_or_scope='partitioned_normalization'):
             agg_inputs = array_ops.concat([att_outputs, target_embeddings, other_feature_embeddings], axis=-1)
