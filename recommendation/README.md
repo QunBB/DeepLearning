@@ -29,3 +29,10 @@
 - **CTR之行为序列建模用户兴趣：DIN**：[专栏](https://zhuanlan.zhihu.com/p/679852484)
 - **CTR之行为序列建模用户兴趣：DIEN**：[专栏](https://zhuanlan.zhihu.com/p/685855305)
 - **CTR之Session行为序列建模用户兴趣：DSIN**：[专栏](https://zhuanlan.zhihu.com/p/688338754)
+
+## 3. 多场景建模(Multi-Domain)
+
+项目文件夹：[recommendation/multidomain](https://github.com/QunBB/DeepLearning/tree/main/recommendation/multidomain)
+
+- **多场景建模: STAR(Star Topology Adaptive Recommender)**：[专栏](https://zhuanlan.zhihu.com/p/717054800)
+- **多场景建模（二）: SAR-Net（Scenario-Aware Ranking Network）**：[专栏](https://zhuanlan.zhihu.com/p/718704281)

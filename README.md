@@ -63,6 +63,7 @@
 项目文件夹：[recommendation/multidomain](https://github.com/QunBB/DeepLearning/tree/main/recommendation/multidomain)
 
 - **多场景建模: STAR(Star Topology Adaptive Recommender)**：[专栏](https://zhuanlan.zhihu.com/p/717054800)
+- **多场景建模（二）: SAR-Net（Scenario-Aware Ranking Network）**：[专栏](https://zhuanlan.zhihu.com/p/718704281)
 
 # 4. TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
