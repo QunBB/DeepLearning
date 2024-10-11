@@ -60,6 +60,17 @@ def get_sar_net_inputs(num_scenario, batch_size=32, seq_len=20):
     return fields, inputs
 
 
+def get_multi_task_scenario_inputs(task_list, batch_size=32, num_sequence=2, seq_len=20, dim=16):
+    inputs = dict(
+        multi_history_embeddings_list=[tf.convert_to_tensor(np.random.random([batch_size, seq_len, dim]), tf.float32) for _ in range(num_sequence)],
+        multi_history_len_list=[tf.convert_to_tensor(np.random.randint(1, seq_len, [batch_size]), tf.float32) for _ in range(num_sequence)],
+        user_embeddings=tf.convert_to_tensor(np.random.random([batch_size, dim * 10]), tf.float32),
+        scenario_embeddings=tf.convert_to_tensor(np.random.random([batch_size, dim * 2]), tf.float32),
+        task_embeddings={task: tf.convert_to_tensor(np.random.random([batch_size, dim]), tf.float32) for task in task_list},
+    )
+    return inputs
+
+
 class BaseTestCase(unittest.TestCase):
     num_domain = 10
     output = None
@@ -118,6 +129,34 @@ class TestSARNet(BaseTestCase):
                        expert_inputs_dim=512,
                        fairness_coefficient_field_name='fairness_coefficient')
 
+        output = model(**inputs)
+
+        super().set_output(output)
+
+
+class TestM2M(BaseTestCase):
+
+    def test(self):
+        from recommendation.multidomain.m2m import M2M
+
+        num_sequence = 2
+        max_len_sequence = 20
+        dim = 16
+        inputs = get_multi_task_scenario_inputs(['click', 'like'],
+                                                num_sequence=num_sequence, seq_len=max_len_sequence, dim=dim)
+
+        model = M2M(num_experts=6,
+                    num_meta_unit_layer=2,
+                    num_residual_layer=2,
+                    num_attention_heads=2,
+                    attention_head_size=256,
+                    views_dim=256,
+                    num_sequence=num_sequence,
+                    max_len_sequence=max_len_sequence,
+                    position_embedding_dim=dim
+                    )
+
+        inputs['compute_logit'] = True
         output = model(**inputs)
 
         super().set_output(output)

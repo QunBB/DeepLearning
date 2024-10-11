@@ -1,3 +1,8 @@
+"""
+CIKM'2021：SAR-Net: A Scenario-Aware Ranking Network for Personalized Fair Recommendation in Hundreds of Travel Scenarios
+
+https://arxiv.org/pdf/2110.06475
+"""
 from functools import partial
 from typing import List, Callable, Dict
 
