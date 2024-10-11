@@ -64,6 +64,7 @@
 
 - **多场景建模: STAR(Star Topology Adaptive Recommender)**：[专栏](https://zhuanlan.zhihu.com/p/717054800)
 - **多场景建模（二）: SAR-Net（Scenario-Aware Ranking Network）**：[专栏](https://zhuanlan.zhihu.com/p/718704281)
+- **多场景建模（三）: M2M（Multi-Scenario Multi-Task Meta Learning）**：[专栏](https://zhuanlan.zhihu.com/p/939534954)
 
 # 4. TensorRT & Triton
 TensorRT：一种深度学习框架，提升GPU模型推理性能
