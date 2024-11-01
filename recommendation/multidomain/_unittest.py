@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 import os
 import tensorflow as tf
+from numba.cpython.enumimpl import enum_eq
 
 from recommendation.utils.type_declaration import *
 from recommendation.utils.interaction import Attention
@@ -29,7 +30,7 @@ def get_multi_domain_inputs(num_domain, batch_size=32, seq_len=20):
     return fields, inputs
 
 
-def get_sar_net_inputs(num_scenario, batch_size=32, seq_len=20):
+def get_star_net_inputs(num_scenario, batch_size=32, seq_len=20):
     fields = [Field(name='goods_id', dim=64, vocabulary_size=10000),
               Field(name='shop_id', dim=64, vocabulary_size=100, l2_reg=0.00001),
               Field(name='user_id', dim=64, vocabulary_size=2000),
@@ -69,6 +70,25 @@ def get_multi_task_scenario_inputs(task_list, batch_size=32, num_sequence=2, seq
         task_embeddings={task: tf.convert_to_tensor(np.random.random([batch_size, dim]), tf.float32) for task in task_list},
     )
     return inputs
+
+
+def get_pepnet_inputs(domain_list, batch_size=32, seq_len=20):
+    fields = [Field(name='goods_id', dim=64, vocabulary_size=10000),
+              Field(name='shop_id', dim=64, vocabulary_size=100, l2_reg=0.00001),
+              Field(name='user_id', dim=64, vocabulary_size=2000),
+              Field(name='context', dim=64, vocabulary_size=200, l2_reg=0.00001),
+              Field(name='domain_id', dim=64, vocabulary_size=len(domain_list), l2_reg=0.00001),
+              ]
+    inputs = dict(user_behaviors_ids={'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [batch_size, seq_len])),
+                                      'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [batch_size, seq_len]))},
+                  sequence_length=tf.convert_to_tensor(np.random.randint(1, 20, [batch_size])),
+                  item_ids={'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [batch_size])),
+                              'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [batch_size]))},
+                  user_ids={'user_id': tf.convert_to_tensor(np.random.randint(0, 2000, [batch_size]))},
+                  other_feature_ids={'context': tf.convert_to_tensor(np.random.randint(0, 200, [batch_size]))},
+                  domain_ids={domain: {'domain_id': tf.convert_to_tensor(np.ones([batch_size], dtype="int32") * i)} for i, domain in enumerate(domain_list)},
+                  )
+    return fields, inputs
 
 
 class BaseTestCase(unittest.TestCase):
@@ -157,6 +177,21 @@ class TestM2M(BaseTestCase):
                     )
 
         inputs['compute_logit'] = True
+        output = model(**inputs)
+
+        super().set_output(output)
+
+
+class TestPEPNet(BaseTestCase):
+
+    def test(self):
+        from recommendation.multidomain.pepnet import PEPNet
+
+        fields, inputs = get_pepnet_inputs(['domain_1', 'domain_2'])
+
+        model = PEPNet(fields=fields,
+                       num_tasks=3)
+
         output = model(**inputs)
 
         super().set_output(output)
