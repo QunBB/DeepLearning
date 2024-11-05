@@ -140,7 +140,7 @@ class TestSARNet(BaseTestCase):
     def test(self):
         from recommendation.multidomain.sarnet import SARNet
 
-        fields, inputs = get_sar_net_inputs(num_scenario=self.num_domain)
+        fields, inputs = get_star_net_inputs(num_scenario=self.num_domain)
 
         model = SARNet(fields,
                        num_scenario=self.num_domain,
