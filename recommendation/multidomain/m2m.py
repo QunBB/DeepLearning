@@ -15,6 +15,7 @@ class M2M:
                  num_experts: int,
                  num_meta_unit_layer: int,
                  num_residual_layer: int,
+                 shared_meta_unit: bool,
                  num_attention_heads: int,
                  attention_head_size: int,
                  views_dim: int,
@@ -28,6 +29,7 @@ class M2M:
         :param num_experts: MMoE中专家的数量
         :param num_meta_unit_layer: meta unit的层数
         :param num_residual_layer: meta tower模块的层数
+        :param shared_meta_unit: 是否共享meta unit的参数
         :param num_attention_heads: transformer layer中的注意力头的数量
         :param attention_head_size: transformer layer中的注意力输出维度
         :param views_dim: expert view和task view的维度
@@ -59,6 +61,8 @@ class M2M:
                                        size_per_head=attention_head_size
                                        )
 
+        self.shared_meta_unit = shared_meta_unit
+
     def meta_unit(self, input_tensor, scenario_views, num_layer, l2_reg):
         """Meta Unit"""
         input_shape = input_tensor.shape.as_list()
@@ -68,9 +72,9 @@ class M2M:
         outputs = input_tensor
         for i in range(num_layer):
             w = tf.layers.dense(scenario_views, dim * dim, kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
-                           kernel_initializer=tf.glorot_normal_initializer())
+                           kernel_initializer=tf.glorot_normal_initializer(), name=f"meta_unit_w_{i}", reuse=tf.AUTO_REUSE)
             b = tf.layers.dense(scenario_views, dim, kernel_regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
-                           kernel_initializer=tf.glorot_normal_initializer())
+                           kernel_initializer=tf.glorot_normal_initializer(), name=f"meta_unit_b_{i}", reuse=tf.AUTO_REUSE)
             outputs = tf.matmul(outputs, tf.reshape(w, [-1, dim, dim])) + tf.expand_dims(b, axis=1)
             outputs = tf.nn.leaky_relu(outputs)
 
@@ -142,15 +146,17 @@ class M2M:
             task_views = self.mlp(task_embeddings[task], name=f'task-mlp-{task}')
 
             # Meta Attention Module
-            with tf.variable_scope(name_or_scope=f'meta-attention-{task}'):
+            scope = 'meta-attention' if self.shared_meta_unit else f'meta-attention-{task}'
+            with tf.variable_scope(name_or_scope=scope):
                 meta = self.meta_unit(
                     tf.concat([expert_views, tf.repeat(tf.expand_dims(task_views, axis=1), self.num_experts, axis=1)], axis=-1),
                     scenario_views, self.num_meta_unit_layer, self.l2_reg)
-                meta_attention_score = tf.layers.dense(inputs=meta, units=1)
+                meta_attention_score = tf.layers.dense(inputs=meta, units=1, name=f'scalar-dense-{task}')
                 meta_attention_output = tf.reduce_sum(expert_views * meta_attention_score, axis=1)
 
             # Meta Tower Module
-            with tf.variable_scope(name_or_scope=f'meta-tower-{task}'):
+            scope = 'meta-tower' if self.shared_meta_unit else f'meta-tower-{task}'
+            with tf.variable_scope(name_or_scope=scope):
                 meta_tower_output = self.residual_layer(meta_attention_output, scenario_views,
                                                         self.num_residual_layer, self.num_meta_unit_layer, self.l2_reg)
 

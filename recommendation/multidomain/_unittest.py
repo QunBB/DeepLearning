@@ -168,6 +168,7 @@ class TestM2M(BaseTestCase):
         model = M2M(num_experts=6,
                     num_meta_unit_layer=2,
                     num_residual_layer=2,
+                    shared_meta_unit=True,
                     num_attention_heads=2,
                     attention_head_size=256,
                     views_dim=256,
