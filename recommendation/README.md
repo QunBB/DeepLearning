@@ -29,6 +29,7 @@
 - **CTR之行为序列建模用户兴趣：DIN**：[专栏](https://zhuanlan.zhihu.com/p/679852484)
 - **CTR之行为序列建模用户兴趣：DIEN**：[专栏](https://zhuanlan.zhihu.com/p/685855305)
 - **CTR之Session行为序列建模用户兴趣：DSIN**：[专栏](https://zhuanlan.zhihu.com/p/688338754)
+- **CTR之行为序列建模用户兴趣：Temporal Interest Network**：[专栏](https://zhuanlan.zhihu.com/p/7832498217)
 
 ## 3. 多场景建模(Multi-Domain)
 
