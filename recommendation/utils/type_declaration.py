@@ -39,15 +39,9 @@ class KernelType(IntEnum):
 
 
 @dataclass
-class DINField:
+class DINField(Field):
     """
     DIN系列模型的Field
     """
-    name: str
-    embedding_dim: int  # embedding向量维度: D
-    vocabulary_size: int  # unique id数量: K
-    l2_reg: Optional[float] = None  # 普通正则惩罚项
     mini_batch_regularization: bool = False  # 是否使用Mini-batch Aware Regularization, 优先于l2_reg
     ids_occurrence: Optional[Sequence[int]] = None  # 特征ID按照0-(K-1)统计在所有样本中出现的频次
-    init_mean: float = 0.  # 初始化参数
-    init_std: float = 1.0  # 初始化参数

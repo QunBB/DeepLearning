@@ -20,12 +20,12 @@ def get_tensor_inputs():
 
 
 def get_din_inputs(negative=False):
-    fields = [DINField(name='goods_id', embedding_dim=64, vocabulary_size=10000,
+    fields = [DINField(name='goods_id', dim=64, vocabulary_size=10000,
                        mini_batch_regularization=True, ids_occurrence=np.random.randint(1, 100, [10000])),
-              DINField(name='shop_id', embedding_dim=64, vocabulary_size=100, l2_reg=0.00001),
-              DINField(name='user_id', embedding_dim=64, vocabulary_size=2000,
+              DINField(name='shop_id', dim=64, vocabulary_size=100, l2_reg=0.00001),
+              DINField(name='user_id', dim=64, vocabulary_size=2000,
                        mini_batch_regularization=True, ids_occurrence=np.random.randint(1, 100, [2000])),
-              DINField(name='context', embedding_dim=64, vocabulary_size=200, l2_reg=0.00001)
+              DINField(name='context', dim=64, vocabulary_size=200, l2_reg=0.00001)
               ]
     inputs = dict(user_behaviors_ids={'goods_id': tf.convert_to_tensor(np.random.randint(0, 10000, [32, 20])),
                                       'shop_id': tf.convert_to_tensor(np.random.randint(0, 100, [32, 20]))},
@@ -374,6 +374,23 @@ class TestDSIN(BaseTestCase):
                      num_attention_heads=4,
                      intermediate_size=256,
                      **params)
+
+        output = model(**inputs)
+
+        super().set_output(output)
+
+
+class TestTIN(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.tin import TIN
+
+        fields, inputs = get_din_inputs()
+
+        model = TIN(fields=fields,
+                     num_attention_heads=2,
+                     attention_head_size=64,
+                     hidden_units=[256, 64])
 
         output = model(**inputs)
 

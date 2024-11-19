@@ -35,7 +35,7 @@ class BaseModelMiniBatchReg:
         for field in fields:
             mb_reg = field.mini_batch_regularization and field.ids_occurrence is not None  # 是否使用Mini-batch Aware Regularization
             self.embedding_table[field.name] = tf.get_variable(f'{field.name}_embedding_table',
-                                                               shape=[field.vocabulary_size, field.embedding_dim],
+                                                               shape=[field.vocabulary_size, field.dim],
                                                                initializer=tf.truncated_normal_initializer(field.init_mean, field.init_std),
                                                                regularizer=tf.contrib.layers.l2_regularizer(field.l2_reg) if not mb_reg and field.l2_reg else None
                                                                )

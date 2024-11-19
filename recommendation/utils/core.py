@@ -1,6 +1,7 @@
 import tensorflow as tf
-import importlib
 from typing import List, Callable, Optional, Union
+
+from tensorflow.python.keras import activations
 
 
 def dnn_layer(inputs: tf.Tensor,
@@ -34,9 +35,6 @@ def dnn_layer(inputs: tf.Tensor,
     return output
 
 
-nn_module = None
-
-
 def activation_layer(activation: Union[Callable, str],
                      scope: Optional[str] = None,
                      is_training: bool = True):
@@ -46,10 +44,7 @@ def activation_layer(activation: Union[Callable, str],
         elif activation.lower() == 'prelu':
             return lambda x: prelu(x, scope if scope else '')
         else:
-            global nn_module
-            if nn_module is None:
-                nn_module = importlib.import_module('tensorflow.nn')
-                return getattr(nn_module, activation)
+            return activations.get(activation)
     else:
         if activation is dice:
             return lambda x: dice(x, is_training, scope if scope else '')

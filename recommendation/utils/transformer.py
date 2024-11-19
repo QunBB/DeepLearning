@@ -319,7 +319,8 @@ def attention_layer(from_tensor,
                     do_return_2d_tensor=False,
                     batch_size=None,
                     from_seq_length=None,
-                    to_seq_length=None):
+                    to_seq_length=None,
+                    target_aware=False):
     """Performs multi-headed attention from `from_tensor` to `to_tensor`.
 
     This is an implementation of multi-headed attention based on "Attention
@@ -366,6 +367,7 @@ def attention_layer(from_tensor,
         of the 3D version of the `from_tensor`.
       to_seq_length: (Optional) If the input is 2D, this might be the seq length
         of the 3D version of the `to_tensor`.
+      target_aware: (Optional) Whether to use Target-aware Representation for values.
 
     Returns:
       float Tensor of shape [batch_size, from_seq_length,
@@ -481,6 +483,9 @@ def attention_layer(from_tensor,
 
     # `value_layer` = [B, N, T, H]
     value_layer = tf.transpose(value_layer, [0, 2, 1, 3])
+
+    if target_aware:
+        value_layer = value_layer * query_layer
 
     # `context_layer` = [B, N, F, H]
     context_layer = tf.matmul(attention_probs, value_layer)
