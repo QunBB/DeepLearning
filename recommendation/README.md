@@ -30,6 +30,7 @@
 - **CTR之行为序列建模用户兴趣：DIEN**：[专栏](https://zhuanlan.zhihu.com/p/685855305)
 - **CTR之Session行为序列建模用户兴趣：DSIN**：[专栏](https://zhuanlan.zhihu.com/p/688338754)
 - **CTR之行为序列建模用户兴趣：Temporal Interest Network**：[专栏](https://zhuanlan.zhihu.com/p/7832498217)
+- **推荐模型中辅助排序损失的作用**：[专栏](https://zhuanlan.zhihu.com/p/10542978888)
 
 ## 3. 多场景建模(Multi-Domain)
 
