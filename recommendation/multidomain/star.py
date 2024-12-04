@@ -20,6 +20,7 @@ class PartitionedNormalization:
 
     def __init__(self,
                  num_domain,
+                 dim,
                  name,
                  **kwargs):
         self.bn_list = [tf.layers.BatchNormalization(center=False, scale=False, name=f"{name}_bn_{i}", **kwargs) for i in
@@ -27,25 +28,25 @@ class PartitionedNormalization:
 
         self.global_gamma = tf.get_variable(
             name=f"{name}_global_gamma",
-            shape=[1],
+            shape=[dim],
             initializer=tf.constant_initializer(0.5),
             trainable=True
         )
         self.global_beta = tf.get_variable(
             name=f"{name}_global_beta",
-            shape=[1],
+            shape=[dim],
             initializer=tf.zeros_initializer(),
             trainable=True
         )
         self.domain_gamma = tf.get_variable(
             name=f"{name}_domain_gamma",
-            shape=[len(self.bn_list), 1],
+            shape=[len(self.bn_list), dim],
             initializer=tf.constant_initializer(0.5),
             trainable=True
         )
         self.domain_beta = tf.get_variable(
             name=f"{name}_domain_beta",
-            shape=[len(self.bn_list), 1],
+            shape=[len(self.bn_list), dim],
             initializer=tf.zeros_initializer(),
             trainable=True
         )
@@ -128,8 +129,8 @@ class STAR:
         with tf.variable_scope(name_or_scope='attention_layer'):
             self.attention_agg = attention_agg(gru_hidden_size, attention_hidden_units, attention_activation)
 
-        self.start_pn = PartitionedNormalization(num_domain=num_domain, name='star_pn')
-        self.aux_net_pn = PartitionedNormalization(num_domain=num_domain, name='aux_net_pn')
+        self.start_pn = partial(PartitionedNormalization, num_domain=num_domain, name='star_pn')
+        self.aux_net_pn = partial(PartitionedNormalization, num_domain=num_domain, name='aux_net_pn')
 
         with tf.variable_scope(name_or_scope='star_fcn'):
             self.shared_bias = [tf.get_variable(f'star_fcn_b_shared_{i}', shape=[star_fcn_units[i]])
@@ -204,7 +205,7 @@ class STAR:
         with tf.variable_scope(name_or_scope='partitioned_normalization'):
             agg_inputs = array_ops.concat([att_outputs, target_embeddings, other_feature_embeddings], axis=-1)
 
-            pn_outputs = self.start_pn(agg_inputs, domain_index=domain_index, training=is_training)
+            pn_outputs = self.start_pn(dim=agg_inputs.shape.as_list()[-1])(agg_inputs, domain_index=domain_index, training=is_training)
 
         with tf.variable_scope(name_or_scope='star_fcn'):
             star_fcn_outputs = pn_outputs
@@ -218,7 +219,7 @@ class STAR:
             domain_embedding = tf.nn.embedding_lookup(self.embedding_table[self.domain_indicator_field_name], domain_index)
             aux_inputs = array_ops.concat([array_ops.repeat(array_ops.reshape(domain_embedding, [1, -1]),
                                                      array_ops.shape(agg_inputs)[0], axis=0), agg_inputs], axis=-1)
-            aux_inputs = self.aux_net_pn(aux_inputs, domain_index=domain_index, training=is_training)
+            aux_inputs = self.aux_net_pn(dim=aux_inputs.shape.as_list()[-1])(aux_inputs, domain_index=domain_index, training=is_training)
             aux_outputs = self.auxiliary_network(aux_inputs, is_training=is_training)
 
             aux_logit = tf.layers.dense(aux_outputs, 1, kernel_initializer=init_ops.glorot_normal_initializer())
