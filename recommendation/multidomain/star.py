@@ -17,6 +17,9 @@ from ..utils.type_declaration import Field
 
 
 class PartitionedNormalization:
+    """
+    支持一个批次中包含多个场景的样本
+    """
 
     def __init__(self,
                  num_domain,
@@ -51,19 +54,31 @@ class PartitionedNormalization:
             trainable=True
         )
 
-    def compute_bn(self, idx, x, training):
-        return tf.case([
-            (tf.equal(idx, i), lambda: self.bn_list[i](x, training=training)) for i in range(len(self.bn_list))
-        ])
+    def generate_grid_tensor(self, indices, dim):
+        y = tf.range(dim)
+        x_grid, y_grid = tf.meshgrid(indices, y)
+        return tf.transpose(tf.stack([x_grid, y_grid], axis=-1), [1, 0, 2])
 
     def __call__(self, inputs, domain_index, training=None):
-        # take the first sample's domain index as current batch's domain index
-        domain_index = tf.reshape(domain_index, [-1])[0]
+        domain_index = tf.cast(tf.reshape(domain_index, [-1]), "int32")
+        dim = inputs.shape.as_list()[-1]
 
-        output = self.compute_bn(domain_index, inputs, training=training)
+        output = inputs
+        # compute each domain's BN individually
+        for i, bn in enumerate(self.bn_list):
+            mask = tf.equal(domain_index, i)
+            single_bn = self.bn_list[i](tf.boolean_mask(inputs, mask), training=training)
+            single_bn = (self.global_gamma + self.domain_gamma[i]) * single_bn + (
+                        self.global_beta + self.domain_beta[i])
 
-        output = (self.global_gamma + self.domain_gamma[domain_index]) * output + (
-                    self.global_beta + self.domain_beta[domain_index])
+            # get current domain samples' indices
+            indices = tf.boolean_mask(tf.range(tf.shape(inputs)[0]), mask)
+            indices = self.generate_grid_tensor(indices, dim)
+            output = tf.cond(
+                tf.reduce_any(mask),
+                lambda: tf.reshape(tf.tensor_scatter_nd_update(output, indices, single_bn), [-1, dim]),
+                lambda: output
+            )
 
         return output
 
@@ -133,17 +148,17 @@ class STAR:
         self.aux_net_pn = partial(PartitionedNormalization, num_domain=num_domain, name='aux_net_pn')
 
         with tf.variable_scope(name_or_scope='star_fcn'):
-            self.shared_bias = [tf.get_variable(f'star_fcn_b_shared_{i}', shape=[star_fcn_units[i]])
+            self.shared_bias = [tf.get_variable(f'star_fcn_b_shared_{i}', shape=[1, star_fcn_units[i]])
                                 for i in range(len(star_fcn_units))]
             self.domain_bias = [tf.get_variable(f'star_fcn_b_domain_{i}', shape=[num_domain, star_fcn_units[i]])
                                 for i in range(len(star_fcn_units))]
 
             star_fcn_units.insert(0, star_fcn_input_size)
-            self.shared_weights = [tf.get_variable(f'star_fcn_w_shared_{i}', shape=[star_fcn_units[i], star_fcn_units[i+1]],
+            self.shared_weights = [tf.get_variable(f'star_fcn_w_shared_{i}', shape=[1, star_fcn_units[i], star_fcn_units[i+1]],
                                                    regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
                                                    initializer=init_ops.glorot_normal_initializer(), )
                                    for i in range(len(star_fcn_units) - 1)]
-            self.domain_weights = [tf.get_variable(f'star_fcn_w_domain_{i}', shape=[num_domain, star_fcn_units[i], star_fcn_units[i + 1]],
+            self.domain_weights = [tf.get_variable(f'star_fcn_w_domain_{i}', shape=[num_domain, star_fcn_units[i] * star_fcn_units[i + 1]],
                                                    regularizer=tf.contrib.layers.l2_regularizer(l2_reg),
                                                    initializer=init_ops.glorot_normal_initializer(), )
                                    for i in range(len(star_fcn_units) - 1)]
@@ -157,10 +172,18 @@ class STAR:
                                              l2_reg=l2_reg)
 
     def star_fcn(self, inputs, domain_index, layer_index):
-        weights = self.shared_weights[layer_index] * self.domain_weights[layer_index][domain_index]
-        bias = self.shared_bias[layer_index] + self.domain_bias[layer_index][domain_index]
+        inputs = tf.expand_dims(inputs, axis=1)
 
-        return math_ops.matmul(inputs, weights) + bias
+        domain_weight = tf.reshape(tf.nn.embedding_lookup(self.domain_weights[layer_index], domain_index),
+                                   [-1] + self.shared_weights[layer_index].shape.as_list()[1:])
+        weights = self.shared_weights[layer_index] * domain_weight
+        domain_bias = tf.reshape(tf.nn.embedding_lookup(self.domain_bias[layer_index], domain_index),
+                                   [-1] + self.shared_bias[layer_index].shape.as_list()[1:])
+        bias = self.shared_bias[layer_index] + domain_bias
+
+        output = math_ops.matmul(inputs, weights) + tf.expand_dims(bias, axis=1)
+
+        return tf.squeeze(output, axis=1)
 
     def __call__(self,
                  user_behaviors_ids: Dict[str, tf.Tensor],
@@ -200,7 +223,7 @@ class STAR:
             if isinstance(att_outputs, (list, tuple)):
                 att_outputs = att_outputs[-1]
 
-        domain_index = array_ops.reshape(domain_index, [-1])[0]
+        domain_index = array_ops.reshape(domain_index, [-1])
 
         with tf.variable_scope(name_or_scope='partitioned_normalization'):
             agg_inputs = array_ops.concat([att_outputs, target_embeddings, other_feature_embeddings], axis=-1)
