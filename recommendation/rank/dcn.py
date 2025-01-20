@@ -89,26 +89,30 @@ class CrossNetwork:
 
         for i in range(self.layer_num):
 
-            if self.cross_type == 'matrix' and self.low_rank_dim is not None:
-                prod_output = tf.layers.dense(x_l, self.low_rank_dim, activation=self.activation,
-                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
-                                              kernel_initializer=tf.glorot_normal_initializer()
-                                              )
-                prod_output = tf.layers.dense(prod_output, self.input_dim, activation=self.activation,
-                                              kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
-                                              kernel_initializer=tf.glorot_normal_initializer()
-                                              )
-            else:
-                if self.cross_type == 'vector':
-                    unit = 1
+            if self.cross_type == 'matrix':
+                if self.low_rank_dim is not None:
+                    prod_output = tf.layers.dense(x_l, self.low_rank_dim, activation=self.activation,
+                                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
+                                                  kernel_initializer=tf.glorot_normal_initializer()
+                                                  )
+                    prod_output = tf.layers.dense(prod_output, self.input_dim, activation=self.activation,
+                                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
+                                                  kernel_initializer=tf.glorot_normal_initializer()
+                                                  )
                 else:
-                    unit = self.input_dim
-                prod_output = tf.layers.dense(x_l, unit, activation=self.activation,
+                    prod_output = tf.layers.dense(x_l, self.input_dim, activation=self.activation,
+                                                  kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
+                                                  kernel_initializer=tf.glorot_normal_initializer()
+                                                  )
+
+                x_l = x_0 * (prod_output + self.bias[i]) + x_l
+            else:
+                prod_output = tf.layers.dense(x_l, 1, activation=self.activation,
                                               kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
                                               kernel_initializer=tf.glorot_normal_initializer()
                                               )
 
-            x_l = x_0 * prod_output + self.bias[i] + x_l
+                x_l = x_0 * prod_output + self.bias[i] + x_l
 
         return x_l
 
