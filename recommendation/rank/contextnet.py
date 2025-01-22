@@ -27,6 +27,35 @@ class ContextNet:
         :param l2_reg:
         :param dropout:
         """
+        self.l2_reg = l2_reg
+        self.context_block = ContextBlock(num_block, agg_dim, ffn_type, embedding_ln, l2_reg, dropout)
+
+    def __call__(self,
+                 inputs: Union[List[tf.Tensor], tf.Tensor],
+                 is_training: bool = True):
+        """
+
+        :param inputs: [bs, num_feature, dim] or list of [bs, dim]
+        :param is_training:
+        :return:
+        """
+        output = self.context_block(inputs, is_training)
+
+        output = tf.layers.dense(output, 1, activation=tf.nn.sigmoid,
+                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
+                                 kernel_initializer=tf.glorot_normal_initializer())
+        return tf.reshape(output, [-1])
+
+
+class ContextBlock:
+    def __init__(self,
+                 num_block: int = 2,
+                 agg_dim: int = 64,
+                 ffn_type: str = 'FFN',
+                 embedding_ln: bool = True,
+                 l2_reg: float = 0.,
+                 dropout: float = 0.
+                 ):
         self.num_block = num_block
         self.agg_dim = agg_dim
         self.embedding_ln = embedding_ln
@@ -40,37 +69,6 @@ class ContextNet:
             self.ffn_func = self.single_layer
         else:
             raise TypeError('ffn_type only support: "PFFN" or "FFN"')
-
-    def __call__(self,
-                 inputs: Union[List[tf.Tensor], tf.Tensor],
-                 is_training: bool = True):
-        """
-
-        :param inputs: [bs, num_feature, dim] or list of [bs, dim]
-        :param is_training:
-        :return:
-        """
-        if isinstance(inputs, list):
-            inputs = tf.stack(inputs, axis=1)
-
-        assert len(inputs.shape) == 3
-
-        if self.embedding_ln:
-            inputs = tf.contrib.layers.layer_norm(inputs=inputs,
-                                                  begin_norm_axis=-1,
-                                                  begin_params_axis=-1)
-
-        # stack ContextNet block
-        output = inputs
-        for _ in range(self.num_block):
-            output = self.contextnet_block(output, is_training)
-
-        # flatten
-        output = tf.layers.flatten(output)
-        output = tf.layers.dense(output, 1, activation=tf.nn.sigmoid,
-                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
-                                 kernel_initializer=tf.glorot_normal_initializer())
-        return tf.reshape(output, [-1])
 
     def get_contextual_embedding(self, embeddings, is_training):
         shape = embeddings.shape.as_list()
@@ -113,5 +111,34 @@ class ContextNet:
                                                   begin_norm_axis=-1,
                                                   begin_params_axis=-1,
                                                   scope='single-layer-ln')
+
+        return output
+
+    def __call__(self,
+                 inputs: Union[List[tf.Tensor], tf.Tensor],
+                 is_training: bool = True):
+        """
+
+        :param inputs: [bs, num_feature, dim] or list of [bs, dim]
+        :param is_training:
+        :return:
+        """
+        if isinstance(inputs, list):
+            inputs = tf.stack(inputs, axis=1)
+
+        assert len(inputs.shape) == 3
+
+        if self.embedding_ln:
+            inputs = tf.contrib.layers.layer_norm(inputs=inputs,
+                                                  begin_norm_axis=-1,
+                                                  begin_params_axis=-1)
+
+        # stack ContextNet block
+        output = inputs
+        for _ in range(self.num_block):
+            output = self.contextnet_block(output, is_training)
+
+        # flatten
+        output = tf.layers.flatten(output)
 
         return output

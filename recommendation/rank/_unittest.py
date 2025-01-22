@@ -397,5 +397,41 @@ class TestTIN(BaseTestCase):
         super().set_output(output)
 
 
+class TestGwPFM(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.gwpfm import GwPFM
+
+        model = GwPFM([Field(name='c1', vocabulary_size=100, dim=10, group='g1'),
+                       Field(name='c2', vocabulary_size=100, dim=10, group='g1'),
+                       Field(name='d1', dim=10, group='g2')],
+                      dnn_hidden_units=[128, 64],
+                      dnn_activation=tf.nn.relu,
+                      )
+
+        sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs()
+
+        output = model(sparse_inputs_dict, dense_inputs_dict)
+
+        super().set_output(output)
+
+
+class TestHMoE(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.hmoe import HMoE, Expert
+
+        model = HMoE(expert_group={'group_1': {Expert.InnerProduct: {}, Expert.CrossNetwork: {'input_dim': 512}},
+                                   'group_2': {Expert.SerialMaskNet: dict(agg_dim=1024, num_mask_block=3, mask_block_ffn_size=[256, 128, 64])}},
+                      dnn_hidden_units=[128, 64],
+                      dnn_activation=tf.nn.relu,
+                      )
+
+        output = model({'group_1': [tf.convert_to_tensor(np.random.random([32, 64]).astype(np.float32)) for _ in range(8)],
+                        'group_2': [tf.convert_to_tensor(np.random.random([32, 64]).astype(np.float32)) for _ in range(8)]})
+
+        super().set_output(output)
+
+
 if __name__ == '__main__':
     unittest.main()

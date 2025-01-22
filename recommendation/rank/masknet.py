@@ -30,19 +30,13 @@ class MaskNet:
         :param dropout:
         :param l2_reg:
         """
-        self.agg_dim = agg_dim
-        self.num_mask_block = num_mask_block
-        self.mask_block_ffn_size = mask_block_ffn_size
-        self.hidden_layer_size = hidden_layer_size
         self.l2_reg = l2_reg
 
-        self.dnn_layer = partial(dnn_layer, dropout=dropout, use_bn=False, l2_reg=l2_reg)
-
         if masknet_type == 'serial':
-            self.net_func = self.serial_model
+            self.net_func = SerialMaskNet(agg_dim, num_mask_block, mask_block_ffn_size, hidden_layer_size, dropout, l2_reg)
             assert isinstance(mask_block_ffn_size, list) and len(mask_block_ffn_size) == num_mask_block
         elif masknet_type == 'parallel':
-            self.net_func = self.parallel_model
+            self.net_func = ParallelMaskNet(agg_dim, num_mask_block, mask_block_ffn_size, hidden_layer_size, dropout, l2_reg)
             assert isinstance(mask_block_ffn_size, int) and isinstance(hidden_layer_size, list)
         else:
             raise TypeError('masknet_type only support "serial" or "parallel"')
@@ -56,6 +50,32 @@ class MaskNet:
         :param is_training:
         :return:
         """
+        output = self.net_func(embeddings, is_training)
+
+        output = tf.layers.dense(output, 1, activation=tf.nn.sigmoid,
+                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
+                                 kernel_initializer=tf.glorot_normal_initializer())
+        return tf.reshape(output, [-1])
+
+
+class MaskBlock:
+    def __init__(self,
+                 agg_dim: int,
+                 num_mask_block: int,
+                 mask_block_ffn_size: Union[List[int], int],
+                 hidden_layer_size: Optional[List[int]] = None,
+                 dropout: float = 0.,
+                 l2_reg: float = 0.
+                 ):
+        self.agg_dim = agg_dim
+        self.num_mask_block = num_mask_block
+        self.mask_block_ffn_size = mask_block_ffn_size
+        self.hidden_layer_size = hidden_layer_size
+        self.l2_reg = l2_reg
+
+        self.dnn_layer = partial(dnn_layer, dropout=dropout, use_bn=False, l2_reg=l2_reg)
+
+    def embedding_norm(self, embeddings):
         if isinstance(embeddings, list):
             embeddings = tf.stack(embeddings, axis=1)
 
@@ -68,12 +88,7 @@ class MaskNet:
         embeddings = tf.layers.flatten(embeddings)
         ln_embeddings = tf.layers.flatten(ln_embeddings)
 
-        output = self.net_func(embeddings, ln_embeddings, is_training)
-
-        output = tf.layers.dense(output, 1, activation=tf.nn.sigmoid,
-                                 kernel_regularizer=tf.contrib.layers.l2_regularizer(self.l2_reg),
-                                 kernel_initializer=tf.glorot_normal_initializer())
-        return tf.reshape(output, [-1])
+        return embeddings, ln_embeddings
 
     def serial_model(self, embeddings, ln_embeddings, is_training):
         """串行MaskNet"""
@@ -110,3 +125,24 @@ class MaskNet:
                                               begin_norm_axis=-1,
                                               begin_params_axis=-1)
         return tf.nn.relu(output)
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class SerialMaskNet(MaskBlock):
+    def __call__(self, embeddings, is_training=True):
+        embeddings, ln_embeddings = self.embedding_norm(embeddings)
+
+        output = self.serial_model(embeddings, ln_embeddings, is_training)
+
+        return output
+
+
+class ParallelMaskNet(MaskBlock):
+    def __call__(self, embeddings, is_training=True):
+        embeddings, ln_embeddings = self.embedding_norm(embeddings)
+
+        output = self.parallel_model(embeddings, ln_embeddings, is_training)
+
+        return output

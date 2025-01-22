@@ -8,7 +8,7 @@
 地址：https://arxiv.org/pdf/2008.13535.pdf
 """
 import tensorflow as tf
-from typing import Optional, Callable, List
+from typing import Optional, Callable, List, Union
 from functools import partial
 
 from ..utils.core import dnn_layer
@@ -53,7 +53,7 @@ class DCN:
 class CrossNetwork:
     def __init__(self,
                  input_dim: int,
-                 layer_num: int,
+                 layer_num: int = 2,
                  cross_type: str = 'vector',
                  low_rank_dim: Optional[int] = None,
                  activation: Optional[Callable] = None,
@@ -80,7 +80,9 @@ class CrossNetwork:
         self.bias = [tf.get_variable(f'cross_bias_{i}', [1, input_dim], initializer=tf.zeros_initializer())
                      for i in range(layer_num)]
 
-    def __call__(self, inputs: tf.Tensor):
+    def __call__(self, inputs: Union[tf.Tensor, List[tf.Tensor]], **kwargs):
+        if isinstance(inputs, list):
+            inputs = tf.concat(inputs, axis=-1)
         assert inputs.shape.as_list()[-1] == self.input_dim and inputs.shape.ndims == 2, \
             "the dimension of inputs must be equal to `input_dim` and rank muse be 2"
 

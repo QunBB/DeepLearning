@@ -74,7 +74,7 @@ class FMs:
 
         return final_logit
 
-    def _fm_interaction(self, interactions):
+    def _fm_interaction(self, interactions: List[tf.Tensor]):
         interactions = tf.stack(interactions, axis=1)
         square_of_sum = tf.square(tf.reduce_sum(
             interactions, axis=1, keep_dims=True))
@@ -85,7 +85,7 @@ class FMs:
 
         return tf.reshape(fm_logit, [-1])
 
-    def _fwfm_interaction(self, interactions):
+    def _fwfm_interaction(self, interactions: List[tf.Tensor]):
         logits = []
         for i, j in itertools.combinations(range(self.num_fields), 2):
             r_ij = self.interaction_strengths[i, j]
@@ -95,7 +95,7 @@ class FMs:
 
         return tf.add_n(logits)
 
-    def _fefm_interaction(self, interactions):
+    def _fefm_interaction(self, interactions: List[tf.Tensor]):
         logits = []
         for i, j in itertools.combinations(range(self.num_fields), 2):
             w_ij = self.interaction_strengths[i, j]

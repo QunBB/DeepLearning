@@ -6,8 +6,7 @@
     论文：Product-based Neural Networks for User Response Prediction
     地址：https://arxiv.org/pdf/1611.00144.pdf
 """
-from typing import List, Union, Callable, Optional
-from enum import IntEnum
+from typing import List, Callable, Optional
 import tensorflow as tf
 
 from ..utils.core import dnn_layer
@@ -60,37 +59,12 @@ class PNN:
         self.kernel_type = kernel_type
         if kernel_type is not None:
             # 新论文的product
-
-            num_pairs = int(num_fields * (num_fields - 1) / 2)
-
-            if self.kernel_type == KernelType.Net:
-                # PIN
-                self.micro_net_activation = micro_net_activation
-
-                self.kernel_w = [tf.get_variable('micro_net_w1', shape=[1, num_pairs, dim*3, micro_net_size],
-                                                 initializer=tf.glorot_normal_initializer()),
-                                 tf.get_variable('micro_net_w2', shape=[1, num_pairs, micro_net_size, 1],
-                                                 initializer=tf.glorot_normal_initializer())]
-                self.kernel_b = [tf.get_variable('micro_net_b1', shape=[1, num_pairs, micro_net_size],
-                                                 initializer=tf.glorot_normal_initializer()),
-                                 tf.get_variable('micro_net_b2', shape=[1, num_pairs, 1],
-                                                 initializer=tf.glorot_normal_initializer())]
-
-            # 不同kernel的KPNN
-            elif self.kernel_type == KernelType.Mat:
-                self.kernel = tf.get_variable('product_kernel', shape=[dim, num_pairs, dim],
-                                              initializer=tf.glorot_normal_initializer())
-            elif self.kernel_type == KernelType.Vec:
-                self.kernel = tf.get_variable('product_kernel', shape=[num_pairs, dim],
-                                              initializer=tf.glorot_normal_initializer())
-            elif self.kernel_type == KernelType.Num:
-                self.kernel = tf.get_variable('product_kernel', shape=[num_pairs, 1],
-                                              initializer=tf.glorot_normal_initializer())
-            else:
-                raise TypeError('not support such kernel')
-
-            self.inner_product_func = self._new_inner_product
-            self.outer_product_func = self._new_outer_product
+            self.inner_product_func = InnerProduct()
+            self.outer_product_func = OuterProduct(kernel_type=kernel_type,
+                                                   num_fields=num_fields,
+                                                   dim=dim,
+                                                   net_size=micro_net_size,
+                                                   net_activation=micro_net_activation)
         else:
             # 旧论文的product
 
@@ -170,6 +144,8 @@ class PNN:
         l_p = tf.reduce_sum(l_p, axis=[2, 3])
         return l_p
 
+
+class ProductLayer:
     def _get_embedding_pairs(self, embeddings_list):
         num_fields = len(embeddings_list)
 
@@ -196,14 +172,57 @@ class PNN:
         p = tf.stack(p, axis=1)
         return p
 
-    def _new_inner_product(self, embeddings_list):
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class InnerProduct(ProductLayer):
+    def __call__(self, embeddings_list, **kwargs):
         p, q = self._get_embedding_pairs(embeddings_list)
 
         ip = tf.reduce_sum(p * q, [-1])
 
         return ip
 
-    def _new_outer_product(self, embeddings_list):
+
+class OuterProduct(ProductLayer):
+    def __init__(self,
+                 num_fields,
+                 dim,
+                 net_size: int = 64,
+                 kernel_type: KernelType = KernelType.Mat,
+                 net_activation: Optional[Callable] = None):
+        self.kernel_type = kernel_type
+
+        num_pairs = int(num_fields * (num_fields - 1) / 2)
+
+        if self.kernel_type == KernelType.Net:
+            # PIN
+            self.micro_net_activation = net_activation
+
+            self.kernel_w = [tf.get_variable('micro_net_w1', shape=[1, num_pairs, dim * 3, net_size],
+                                             initializer=tf.glorot_normal_initializer()),
+                             tf.get_variable('micro_net_w2', shape=[1, num_pairs, net_size, 1],
+                                             initializer=tf.glorot_normal_initializer())]
+            self.kernel_b = [tf.get_variable('micro_net_b1', shape=[1, num_pairs, net_size],
+                                             initializer=tf.glorot_normal_initializer()),
+                             tf.get_variable('micro_net_b2', shape=[1, num_pairs, 1],
+                                             initializer=tf.glorot_normal_initializer())]
+
+        # 不同kernel的KPNN
+        elif self.kernel_type == KernelType.Mat:
+            self.kernel = tf.get_variable('product_kernel', shape=[dim, num_pairs, dim],
+                                          initializer=tf.glorot_normal_initializer())
+        elif self.kernel_type == KernelType.Vec:
+            self.kernel = tf.get_variable('product_kernel', shape=[num_pairs, dim],
+                                          initializer=tf.glorot_normal_initializer())
+        elif self.kernel_type == KernelType.Num:
+            self.kernel = tf.get_variable('product_kernel', shape=[num_pairs, 1],
+                                          initializer=tf.glorot_normal_initializer())
+        else:
+            raise TypeError('not support such kernel')
+
+    def __call__(self, embeddings_list, **kwargs):
         # PIN: micro network kernel
         if self.kernel_type == KernelType.Net:
             # [bs, paris, 3*dim]
