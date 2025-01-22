@@ -15,6 +15,7 @@ class FMType(IntEnum):
     FM = 1
     FwFM = 2
     FEFM = 3
+    GwPFM = 4
 
 
 @dataclass
@@ -25,6 +26,7 @@ class Field:
     l2_reg: float = 0.  # embedding的正则惩罚
     init_mean: float = 0.  # 初始化参数
     init_std: float = 1.0  # 初始化参数
+    group: str = "default"
 
 
 # PNN
