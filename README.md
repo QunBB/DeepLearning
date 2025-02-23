@@ -33,6 +33,7 @@
 # 3. 推荐系统
 
 项目文件夹：[recommendation](https://github.com/QunBB/DeepLearning/tree/main/recommendation)
+(本git的推荐系统使用的是tensorflow1.x，关于tensorflow2.x的实现可前往另外一个[git](https://github.com/QunBB/RecSys))
 
 - **ctr训练提速(超大batch size)-CowClip**：[专栏](https://zhuanlan.zhihu.com/p/557451365)
 - **基于二叉树的近似最近邻搜索-Annoy**: [专栏](https://zhuanlan.zhihu.com/p/714579473)
