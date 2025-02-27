@@ -1,0 +1,4 @@
+vllm
+trl
+addict
+modelscope
