@@ -20,3 +20,9 @@ LangChain开发入门教程
 ## 3.3 Tools/Agents
 
 - [tools_agents.ipynb](https://github.com/QunBB/DeepLearning/blob/main/llms/langchain_tutorial/tools_agents.ipynb)
+
+# 2. LLM训练
+
+## 2.1 复现DeepSeek-R1的思维链
+
+- [sft+grpo微调](https://github.com/QunBB/DeepLearning/tree/main/llms/train/deepseek-train)

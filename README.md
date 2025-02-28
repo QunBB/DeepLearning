@@ -138,3 +138,9 @@ LangChain开发入门教程：：[llms/langchain_tutorial](https://github.com/Qu
 - **Model I/O（prompts、llms、chat model、output parsers）**：[专栏](https://zhuanlan.zhihu.com/p/700167692)
 - **RAG/Retrieval（文档加载器、文本分割器、Embedding、向量数据库、检索）**：[专栏](https://zhuanlan.zhihu.com/p/706889931)
 - **Tools/Agents（工具、function call、agent）**：[专栏](https://zhuanlan.zhihu.com/p/712459598)
+
+## 9.2 LLM训练
+
+LLM训练：[llms/train](https://github.com/QunBB/DeepLearning/tree/main/llms/train)
+
+- **尝试基于小模型复现DeepSeek-R1的思维链以及白话文介绍如何从零训练一个LLM**：[专栏](https://zhuanlan.zhihu.com/p/26939947191)
