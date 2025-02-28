@@ -19,10 +19,10 @@ pip install addict modelscope
 
 ```bash
 # sft
-python main.py --task=sft_train --model_name=Qwen/Qwen2.5-0.5B-Instruct --bf16 --checkpoint_dir=outputs/Qwen-0.5B-SFT-FirstHalf --per_device_train_batch_size=8 --save_strategy=epoch --epochs=1
+python main.py --task=sft_train --model_name_or_path=Qwen/Qwen2.5-0.5B-Instruct --bf16 --checkpoint_dir=outputs/Qwen-0.5B-SFT-FirstHalf --per_device_train_batch_size=8 --save_strategy=epoch --epochs=1
 
 # grpo
-python main.py --task=grpo_train --model_name=outputs/Qwen-0.5B-SFT-FirstHalf/checkpoint-117 --bf16 --use_vllm --checkpoint_dir=outputs/Qwen-0.5B-GRPO-SecondHalf --per_device_train_batch_size=8 --save_strategy=epoch 
+python main.py --task=grpo_train --model_name_or_path=outputs/Qwen-0.5B-SFT-FirstHalf/checkpoint-117 --bf16 --use_vllm --checkpoint_dir=outputs/Qwen-0.5B-GRPO-SecondHalf --per_device_train_batch_size=8 --save_strategy=epoch 
 ```
 
 ## 推理
