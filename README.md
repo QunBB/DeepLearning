@@ -1,5 +1,3 @@
-[<img src="https://api.gitsponsors.com/api/badge/img?id=419746952" height="40">](https://api.gitsponsors.com/api/badge/link?p=1KgsCPEwLkeM9OhPLyONthSPwzpU86MFRdz5Zm2VJ72LipcdlWg6A0do/CZbX3Lck3ujRRVf0xsx6f3jPNJ1iMVLyFPzlJ2fnA+7PknPRKaFl2OA4OoRZqMMcJpKbg6LGwJcEgqhqcNnJzhW3d7d2A==)
-
 # 1. tensorflow使用
 
 项目文件夹：[_tensorflow](https://github.com/QunBB/DeepLearning/tree/main/_tensorflow)
