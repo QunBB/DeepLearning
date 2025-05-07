@@ -62,6 +62,7 @@
 - **CTR之行为序列建模用户兴趣：Temporal Interest Network**：[专栏](https://zhuanlan.zhihu.com/p/7832498217)
 - **推荐模型中辅助排序损失的作用**：[专栏](https://zhuanlan.zhihu.com/p/10542978888)
 - **GwPFM&HMoE: 推荐模型中的维度坍塌&兴趣纠缠**：[专栏](https://zhuanlan.zhihu.com/p/19885938029)
+- **推荐系统特征建模: AdaF^2M^2**：[专栏](https://zhuanlan.zhihu.com/p/1903561181152641052)
 
 ## 3.3 多场景建模(Multi-Domain)
 
