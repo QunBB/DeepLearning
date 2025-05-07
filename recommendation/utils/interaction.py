@@ -1,7 +1,8 @@
 import itertools
 from collections import OrderedDict
-from typing import List, Union
+from typing import List, Union, Optional, Callable
 from typing import Dict as OrderedDictType
+from functools import partial
 
 import tensorflow as tf
 from tensorflow.python.ops.rnn_cell import GRUCell, RNNCell
@@ -84,6 +85,156 @@ class LinearEmbedding:
             embeddings = list(embeddings.values())
 
         return embeddings, linear_logit
+
+
+class MaskEmbedding:
+    def __init__(self,
+                 fields_list: List[Field],
+                 num_sample: int,
+                 min_probability: float = 0.1,
+                 max_probability: float = 0.5):
+        """增加特征掩码的embedding
+
+        :param fields_list: 所有fields列表
+        :param num_sample: 增强样本的数量
+        :param min_probability: 特征随机mask的最小概率
+        :param max_probability: 特征随机mask的最大概率
+        """
+        self.embeddings_table = {}
+        self.mask_embeddings = {}
+
+        for field in fields_list:
+            self.embeddings_table[field.name] = tf.get_variable('emb_' + field.name,
+                                                                shape=[field.vocabulary_size, field.dim],
+                                                                regularizer=tf.contrib.layers.l2_regularizer(field.l2_reg))
+
+            self.mask_embeddings[field.name] = tf.get_variable('mask_emb_' + field.name,
+                                                               shape=[1, 1, field.dim],
+                                                               regularizer=tf.contrib.layers.l2_regularizer(field.l2_reg))
+
+        self.num_sample = num_sample
+        self.min_probability = min_probability
+        self.max_probability = max_probability
+
+    def __call__(self,
+                 sparse_id_inputs_dict: OrderedDictType[str, tf.Tensor] = {},
+                 dense_value_inputs_dict: OrderedDictType[str, tf.Tensor] = {},
+                 as_dict: bool = False):
+        embeddings = OrderedDict()
+        augment_embeddings = OrderedDict()
+
+        for name, x in sparse_id_inputs_dict.items():
+            v = tf.nn.embedding_lookup(self.embeddings_table[name], x)
+            embeddings[name] = v
+
+        for name, x in dense_value_inputs_dict.items():
+            v = tf.reshape(self.embeddings_table[name][0], [1, -1])
+            embeddings[name] = v * tf.reshape(x, [-1, 1])
+
+        # 特征随机mask的增强样本
+        for name, emb in embeddings.items():
+            dim = emb.shape[-1]
+            probability = tf.random.uniform([1, self.num_sample, 1], minval=self.min_probability,
+                                            maxval=self.max_probability)
+            mask = tf.cast(tf.random.uniform(probability.shape) < probability, emb.dtype)
+
+            emb = tf.expand_dims(emb, axis=1)  # [batch_size, 1, dim]
+
+            augments = emb * (1 - mask) + self.mask_embeddings[name] * mask  # [batch_size, num_sample, dim]
+            augments = tf.reshape(augments, [-1, dim])  # [batch_size*num_sample, dim]
+            augment_embeddings[name] = augments
+
+        if not as_dict:
+            embeddings = list(embeddings.values())
+            augment_embeddings = list(augment_embeddings.values())
+
+        return embeddings, augment_embeddings
+
+
+class StateAwareAdapter:
+    def __init__(self,
+                 output_size: int,
+                 id_fields_list: List[Field] = None,
+                 non_id_fields_list: List[Field] = None,
+                 embed_dense: bool = False,
+                 embeddings_table: Optional[dict] = None,
+                 function: str = "Sigmoid",
+                 norm_clip_min: Optional[float] = None,
+                 norm_clip_max: Optional[float] = None):
+        """增加特征掩码的embedding
+
+        :param output_size: 输出size
+        :param id_fields_list: 状态信号的ID特征列表，会拼接原embedding和其norm
+        :param non_id_fields_list: 状态信号的非ID特征列表
+        :param embed_dense: 是否对状态信号输入进行embedding映射
+        :param embeddings_table: 全局embedding table，用户获取状态信号ID特征对应的embedding
+        :param function: 概率计算函数
+        :param norm_clip_min: embedding norm的下界
+        :param norm_clip_max: embedding norm的上界
+        """
+        assert function.lower() in ("sigmoid", "softmax"), "Function should be one of: 'Sigmoid' or 'Softmax'."
+        self.embeddings_table = embeddings_table or {}
+        self.norm_embeddings_table = {}
+        self.mask_embeddings = {}
+
+        self.embed_dense = embed_dense
+        for field in non_id_fields_list or []:
+            if not embed_dense:
+                continue
+            if field.name in self.embeddings_table:
+                continue
+            self.embeddings_table[field.name] = tf.get_variable('emb_' + field.name,
+                                                                shape=[field.vocabulary_size, field.dim],
+                                                                regularizer=tf.contrib.layers.l2_regularizer(field.l2_reg))
+
+        self.norm_no_linear_func = [tf.math.log, tf.math.sqrt, tf.math.square]
+        self.norm_clip = {}
+        if norm_clip_min:
+            self.norm_clip['clip_value_min'] = norm_clip_min
+        if norm_clip_max:
+            self.norm_clip['clip_value_max'] = norm_clip_max
+        for field in id_fields_list or []:
+            assert field.name in self.embeddings_table
+            if not embed_dense:
+                continue
+            self.norm_embeddings_table[field.name] = tf.get_variable('norm_emb_' + field.name,
+                                                                shape=[len(self.norm_no_linear_func), field.dim],
+                                                                regularizer=tf.contrib.layers.l2_regularizer(field.l2_reg))
+
+        self.output_size = output_size
+        if function.lower() == "sigmoid":
+            self.activation = tf.nn.sigmoid
+        else:
+            self.activation = tf.nn.softmax
+
+    def __call__(self,
+                 sparse_id_inputs_dict: OrderedDictType[str, tf.Tensor] = {},
+                 dense_value_inputs_dict: OrderedDictType[str, tf.Tensor] = {}):
+        embeddings = OrderedDict()
+
+        for name, x in sparse_id_inputs_dict.items():
+            v = tf.nn.embedding_lookup(self.embeddings_table[name], x)
+            embeddings[name] = v
+            # if name in self.norm_embeddings_table:
+            if self.norm_clip:
+                norm = tf.clip_by_value(tf.norm(v, axis=-1, keepdims=True), **self.norm_clip)
+            else:
+                norm = tf.norm(v, axis=-1, keepdims=True)
+            for i, func in enumerate(self.norm_no_linear_func):
+                norm_no_linear = func(norm)
+                if self.embed_dense:
+                    embeddings[f"norm_{i}_{name}"] = norm_no_linear * self.embeddings_table[name][0]
+                else:
+                    embeddings[f"norm_{i}_{name}"] = norm_no_linear
+
+        for name, x in dense_value_inputs_dict.items():
+            if self.embed_dense:
+                v = tf.reshape(self.embeddings_table[name][0], [1, -1])
+                embeddings[name] = v * tf.reshape(x, [-1, 1])
+            else:
+                embeddings[name] = tf.reshape(x, [-1, 1])
+
+        return tf.layers.dense(tf.concat(list(embeddings.values()), axis=-1), self.output_size, activation=self.activation)
 
 
 class BiLinear:

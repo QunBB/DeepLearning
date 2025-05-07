@@ -10,12 +10,16 @@ from recommendation.utils.type_declaration import *
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
 
-def get_tensor_inputs():
+def get_tensor_inputs(sparse_list=['c1', 'c2'], dense_list=['d1']):
     batch_size = 32
 
-    sparse_inputs_dict = OrderedDict(c1=tf.convert_to_tensor(np.random.randint(0, 99, size=[batch_size])),
-                                     c2=tf.convert_to_tensor(np.random.randint(0, 99, size=[batch_size])))
-    dense_inputs_dict = OrderedDict(d1=tf.convert_to_tensor(np.random.random(size=[batch_size]).astype(np.float32)))
+    sparse_inputs_dict = OrderedDict()
+    for name in sparse_list:
+        sparse_inputs_dict[name] = tf.convert_to_tensor(np.random.randint(0, 99, size=[batch_size]))
+
+    dense_inputs_dict = OrderedDict()
+    for name in dense_list:
+        dense_inputs_dict[name] = tf.convert_to_tensor(np.random.random(size=[batch_size]).astype(np.float32))
     return sparse_inputs_dict, dense_inputs_dict
 
 
@@ -429,6 +433,33 @@ class TestHMoE(BaseTestCase):
 
         output = model({'group_1': [tf.convert_to_tensor(np.random.random([32, 64]).astype(np.float32)) for _ in range(8)],
                         'group_2': [tf.convert_to_tensor(np.random.random([32, 64]).astype(np.float32)) for _ in range(8)]})
+
+        super().set_output(output)
+
+
+class TestAdaF2M2(BaseTestCase):
+
+    def test(self):
+        from recommendation.rank.adaf2m2 import AdaF2M2, Expert
+
+        model = AdaF2M2(
+            fields_list=[Field(name='user_id', vocabulary_size=100, dim=10),
+                         Field(name='item_id', vocabulary_size=100, dim=10),
+                         Field(name='context_id', vocabulary_size=100, dim=10)],
+            state_id_fields=[Field(name='user_id', vocabulary_size=100, dim=10),
+                             Field(name='item_id', vocabulary_size=100, dim=10)],
+            state_non_id_fields=[Field(name='interaction_count')],
+            num_sample=3,
+            hidden_units=[128, 64],
+            interaction=Expert.InnerProduct
+        )
+
+        sparse_inputs_dict, dense_inputs_dict = get_tensor_inputs(
+            sparse_list=['user_id', 'item_id', 'context_id'],
+            dense_list=['interaction_count']
+        )
+
+        output = model(sparse_inputs_dict, dense_inputs_dict)
 
         super().set_output(output)
 

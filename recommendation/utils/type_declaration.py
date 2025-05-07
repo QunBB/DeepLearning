@@ -26,7 +26,7 @@ class Field:
     l2_reg: float = 0.  # embedding的正则惩罚
     init_mean: float = 0.  # 初始化参数
     init_std: float = 1.0  # 初始化参数
-    group: str = "default"
+    group: str = "default"  # 多embedding table时，属于哪一组table
 
 
 # PNN

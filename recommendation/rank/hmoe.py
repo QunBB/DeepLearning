@@ -4,32 +4,13 @@ Ads Recommendation in a Collapsed and Entangled World
 KDD'2024：https://arxiv.org/abs/2403.00793
 """
 from collections import defaultdict
-from enum import Enum
 from functools import partial
 from typing import Optional, Callable, List, Dict, Any
 
 import tensorflow as tf
 
-from .dcn import CrossNetwork
-from .masknet import SerialMaskNet, ParallelMaskNet
-from .pnn import InnerProduct, OuterProduct
-from .contextnet import ContextBlock
+from .interaction_expert import Expert
 from ..utils.core import dnn_layer
-
-
-class Expert(Enum):
-    """
-    专家交互网络枚举类
-    """
-    CrossNetwork = CrossNetwork
-    InnerProduct = InnerProduct
-    OuterProduct = OuterProduct
-    SerialMaskNet = SerialMaskNet
-    ParallelMaskNet = ParallelMaskNet
-    ContextBlock = ContextBlock
-
-    def init_layer(self, *args, **kwargs):
-        return self.value(*args, **kwargs)
 
 
 class HMoE:
